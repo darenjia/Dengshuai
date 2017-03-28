@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_check_plan"
+            android:checked="true"
+            android:icon="@drawable/ic_menu_camera"
+            android:title="现场检查计划" />
+        <item
+            android:id="@+id/nav_info_check"
+            android:icon="@drawable/ic_menu_gallery"
+            android:title="检查计划查询" />
+        <item
+            android:id="@+id/nav_map"
+            android:icon="@drawable/ic_menu_slideshow"
+            android:title="地图" />
+        <item
+            android:id="@+id/nav_details"
+            android:icon="@drawable/ic_menu_manage"
+            android:title="进度详情" />
+        <item
+            android:id="@+id/nav_update_result"
+            android:icon="@drawable/ic_menu_manage"
+            android:title="结果上传" />
+    </group>
+
+    <item android:title="Setting">
+        <menu>
+            <item
+                android:id="@+id/nav_app_introduce"
+                android:icon="@drawable/logout"
+                android:title="使用说明" />
+            <item
+                android:id="@+id/nav_logout"
+                android:icon="@drawable/logout"
+                android:title="注销当前账户" />
+            <item
+                android:id="@+id/nav_exit"
+                android:icon="@drawable/icon_exit"
+                android:title="退出" />
+        </menu>
+    </item>
+
+</menu>
