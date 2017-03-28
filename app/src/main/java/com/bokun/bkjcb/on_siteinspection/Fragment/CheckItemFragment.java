@@ -9,6 +9,7 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.design.widget.Snackbar;
@@ -71,11 +72,21 @@ public class CheckItemFragment extends BaseFragment implements View.OnClickListe
         viewHolder.video_view.setOnClickListener(this);
         viewHolder.audio_view.setOnClickListener(this);
         viewHolder.txt_content.setText(content);
-        path = "/mnt/sdcard/Bokun/";
-        File file = new File(path);
-        if (!file.exists()) {
-            file.mkdirs();
+        if (ContextCompat.checkSelfPermission(getContext(),Manifest.permission_group.STORAGE)!= PackageManager.PERMISSION_GRANTED) {
+            path = Environment.getExternalStorageDirectory()+"/Bokun/";
+            File file = new File(path);
+            if (!file.exists()) {
+                file.mkdirs();
+            }
+        }else {
+            creatSnackBar(R.string.mis_error_no_permission_sdcard);
         }
+        viewHolder.mRdaioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                LogUtil.logI("id:"+checkedId);
+            }
+        });
     }
 
     @Override
@@ -99,8 +110,8 @@ public class CheckItemFragment extends BaseFragment implements View.OnClickListe
                 break;
             case R.id.check_content_btn_audio:
                 intent = new Intent(MediaStore.Audio.Media.RECORD_SOUND_ACTION);
-                String mp3Name = imagePath + (new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()))
-                        + ".jpg";
+                String mp3Name = audioPath + (new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()))
+                        + ".amr";
                 audio = new File(path + mp3Name);
                 startAction(intent, audio, REQUESR_CODE_RECORD);
                 break;
@@ -264,7 +275,6 @@ public class CheckItemFragment extends BaseFragment implements View.OnClickListe
     private void jumpToAction(Intent intent, File file, int type) {
 //        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         if (intent.resolveActivity(getActivity().getPackageManager()) != null) {
-            LogUtil.logI("file:" + (file != null && file.exists()));
             if (file != null) {
              /*获取当前系统的android版本号*/
                 LogUtil.logI("currentapiVersion====>" + currentapiVersion);
@@ -295,7 +305,7 @@ public class CheckItemFragment extends BaseFragment implements View.OnClickListe
     }
 
     private void creatSnackBar(int text) {
-        Snackbar.make(getView(), text, Snackbar.LENGTH_SHORT).setAction("设置", new View.OnClickListener() {
+        Snackbar.make(getView(), text, Snackbar.LENGTH_LONG).setAction("设置", new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
