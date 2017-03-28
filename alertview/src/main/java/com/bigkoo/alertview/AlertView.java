@@ -1,5 +1,6 @@
 package com.bigkoo.alertview;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Typeface;
@@ -127,6 +128,7 @@ public class AlertView {
                 break;
         }
     }
+    @SuppressLint("WrongConstant")
     protected void initHeaderView(ViewGroup viewGroup){
         loAlertHeader = (ViewGroup) viewGroup.findViewById(R.id.loAlertHeader);
         //标题和消息
@@ -167,6 +169,7 @@ public class AlertView {
             }
         });
     }
+    @SuppressLint("WrongConstant")
     protected void initActionSheetViews(LayoutInflater layoutInflater) {
         ViewGroup viewGroup = (ViewGroup) layoutInflater.inflate(R.layout.layout_alertview_actionsheet,contentContainer);
         initHeaderView(viewGroup);

@@ -13,7 +13,7 @@
     <!--线条颜色-->
     <color name="bgColor_divier">#d7d7db</color>
     <!--取消按钮颜色-->
-    <color name="textColor_alert_button_cancel">#007aff</color>
+    <color name="textColor_alert_button_cancel">#444546</color>
     <!--高亮按钮颜色-->
     <color name="textColor_alert_button_destructive">#ff3b30</color>
     <!--普通按钮文字颜色-->

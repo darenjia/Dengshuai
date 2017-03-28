@@ -11,6 +11,8 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/height_alert_button"
         android:gravity="center"
+        android:singleLine="true"
+        android:ellipsize="end"
         android:textColor="@color/textColor_alert_button_others"
         android:textSize="@dimen/textSize_alert_button" />
 </LinearLayout>
