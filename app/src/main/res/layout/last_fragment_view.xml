@@ -64,6 +64,7 @@
 
 
     <Button
+        android:id="@+id/btn_submit"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/check_item_content_end_bg"

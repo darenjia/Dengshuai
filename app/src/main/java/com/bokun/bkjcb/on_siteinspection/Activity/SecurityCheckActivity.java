@@ -20,6 +20,7 @@ import com.bokun.bkjcb.on_siteinspection.Fragment.CheckItemFragment;
 import com.bokun.bkjcb.on_siteinspection.Fragment.LastFragment;
 import com.bokun.bkjcb.on_siteinspection.R;
 import com.bokun.bkjcb.on_siteinspection.Utils.LogUtil;
+import com.bokun.bkjcb.on_siteinspection.Utils.Utils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -54,6 +55,7 @@ public class SecurityCheckActivity extends BaseActivity implements ViewPager.OnP
         toolbar.setTitle("安全检查");
         setSupportActionBar(toolbar);
         toolbar.setNavigationIcon(R.drawable.back);
+        Utils.initSystemBar(this,toolbar);
     }
 
     @Override
@@ -186,7 +188,7 @@ public class SecurityCheckActivity extends BaseActivity implements ViewPager.OnP
             String[] title = new String[16];
             contents.toArray(title);
             title[15]="处理意见";
-            new AlertView(null, null, null, null,
+            new AlertView(null, null, "取消", null,
                     title, this, AlertView.Style.ActionSheet,
                     new OnItemClickListener() {
                         @Override

@@ -69,11 +69,6 @@ public class LoginActivity extends BaseActivity implements RequestListener {
     private HttpManager httpManager;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
-
-    @Override
     protected void initView() {
         setContentView(R.layout.activity_mylogin);
     }
