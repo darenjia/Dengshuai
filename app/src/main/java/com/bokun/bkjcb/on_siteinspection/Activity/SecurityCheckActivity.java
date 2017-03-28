@@ -10,17 +10,15 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.Toolbar;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.bokun.bkjcb.on_siteinspection.Domain.CheckResult;
+import com.bigkoo.alertview.AlertView;
+import com.bigkoo.alertview.OnItemClickListener;
 import com.bokun.bkjcb.on_siteinspection.Fragment.CheckItemFragment;
+import com.bokun.bkjcb.on_siteinspection.Fragment.LastFragment;
 import com.bokun.bkjcb.on_siteinspection.R;
-import com.bokun.bkjcb.on_siteinspection.SQLite.CheckResultDaolmpl;
 import com.bokun.bkjcb.on_siteinspection.Utils.LogUtil;
 
 import org.json.JSONArray;
@@ -42,7 +40,6 @@ public class SecurityCheckActivity extends BaseActivity implements ViewPager.OnP
 
     private Toolbar toolbar;
     private ViewPager viewPager;
-    private Menu mMenu;
     private ImageButton btn_forward;
     private ImageButton btn_next;
     private TextView page_num;
@@ -69,15 +66,19 @@ public class SecurityCheckActivity extends BaseActivity implements ViewPager.OnP
         fragments = new ArrayList<>();
         contents = getCheckItems();
         for (int i = 0; i < contents.size(); i++) {
-            CheckItemFragment fragment = new CheckItemFragment();
+            Fragment fragment = null;
+            fragment = new CheckItemFragment();
             Bundle bundle = new Bundle();
             bundle.putString("content", contents.get(i));
             fragment.setArguments(bundle);
             fragments.add(fragment);
         }
+        Fragment fragment = new LastFragment();
+        fragments.add(fragment);
+        LogUtil.logI("size:" + fragments.size());
         PagerAdapter pagerAdapter = new PagerAdapter(getSupportFragmentManager());
         viewPager.setAdapter(pagerAdapter);
-        viewPager.setCurrentItem(13);
+//        viewPager.setCurrentItem(13);
 //        FragmentAdapter adapter = new FragmentAdapter(context, getCheckItems());
 //        viewPager.setAdapter(adapter);
     }
@@ -93,11 +94,12 @@ public class SecurityCheckActivity extends BaseActivity implements ViewPager.OnP
         viewPager.addOnPageChangeListener(this);
         btn_next.setOnClickListener(this);
         btn_forward.setOnClickListener(this);
+        page_num.setOnClickListener(this);
     }
 
     @Override
     protected void loadData() {
-
+        page_num.setText(1 + "/" + fragments.size());
     }
 
     public static void ComeToSecurityCheckActivity(Activity activity) {
@@ -139,28 +141,28 @@ public class SecurityCheckActivity extends BaseActivity implements ViewPager.OnP
 
     @Override
     public void onPageSelected(int position) {
-        LogUtil.logI("position:" + position);
+        /*LogUtil.logI("position:" + position);
         if (mMenu != null) {
             if (position != 14) {
                 mMenu.findItem(R.id.btn_submit).setVisible(false);
             }
         }
-        LogUtil.logI("position:" + mMenu.hasVisibleItems());
-        page_num.setText((position + 1) + "/15");
+        LogUtil.logI("position:" + mMenu.hasVisibleItems());*/
+        page_num.setText((position + 1) + "/" + fragments.size());
     }
 
     @Override
     public void onPageScrollStateChanged(int state) {
     }
 
-    @Override
+    /*@Override
     public boolean onCreateOptionsMenu(Menu menu) {
         this.mMenu = menu;
         getMenuInflater().inflate(R.menu.check_activity_menu, menu);
         return true;
-    }
+    }*/
 
-    @Override
+   /* @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.btn_submit) {
             Toast.makeText(context, "正在提交", Toast.LENGTH_SHORT).show();
@@ -169,14 +171,6 @@ public class SecurityCheckActivity extends BaseActivity implements ViewPager.OnP
             daolmpl.colseDateBase();
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    /*public void showSubmitBtn() {
-        mMenu.setGroupVisible(R.id.menu_submit, true);
-    }
-
-    public void hiddrenSubmitBtn() {
-        mMenu.setGroupVisible(R.id.menu_submit, false);
     }*/
 
     @Override
@@ -188,6 +182,18 @@ public class SecurityCheckActivity extends BaseActivity implements ViewPager.OnP
         } else if (id == btn_next.getId()) {
             viewPager.arrowScroll(View.FOCUS_RIGHT);
             LogUtil.logI("click forward");
+        } else if (id == page_num.getId()) {
+            String[] title = new String[16];
+            contents.toArray(title);
+            title[15]="处理意见";
+            new AlertView(null, null, null, null,
+                    title, this, AlertView.Style.ActionSheet,
+                    new OnItemClickListener() {
+                        @Override
+                        public void onItemClick(Object o, int position) {
+                        viewPager.setCurrentItem(position,false);
+                        }
+                    }).show();
         }
     }
 
@@ -204,7 +210,7 @@ public class SecurityCheckActivity extends BaseActivity implements ViewPager.OnP
 
         @Override
         public int getCount() {
-            return contents.size();
+            return fragments.size();
         }
     }
 }

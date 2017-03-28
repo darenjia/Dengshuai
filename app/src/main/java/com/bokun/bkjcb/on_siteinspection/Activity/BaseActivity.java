@@ -31,8 +31,10 @@ public abstract class BaseActivity extends AppCompatActivity {
         context = this;
         initView();
         findView();
+        loadData();
         setListener();
         checkPermissions();
+
 
     }
 
