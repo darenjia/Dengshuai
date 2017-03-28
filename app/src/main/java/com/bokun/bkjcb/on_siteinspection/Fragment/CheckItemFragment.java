@@ -67,7 +67,7 @@ public class CheckItemFragment extends BaseFragment implements View.OnClickListe
 
     @Override
     public void initData() {
-        String content = getArguments().getString("txt");
+        String content = getArguments().getString("content");
         viewHolder.camera_view.setOnClickListener(this);
         viewHolder.video_view.setOnClickListener(this);
         viewHolder.audio_view.setOnClickListener(this);
@@ -163,6 +163,7 @@ public class CheckItemFragment extends BaseFragment implements View.OnClickListe
             video_view = (ImageView) findView(R.id.check_content_btn_video);
             audio_view = (ImageView) findView(R.id.check_content_btn_audio);
             btn_remark = (Button) findView(R.id.check_content_btn_remark);
+            mRdaioGroup = (RadioGroup) findView(R.id.check_result);
 
         }
 
