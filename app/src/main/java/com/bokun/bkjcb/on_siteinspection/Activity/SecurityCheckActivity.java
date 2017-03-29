@@ -55,7 +55,7 @@ public class SecurityCheckActivity extends BaseActivity implements ViewPager.OnP
         toolbar.setTitle("安全检查");
         setSupportActionBar(toolbar);
         toolbar.setNavigationIcon(R.drawable.back);
-        Utils.initSystemBar(this,toolbar);
+        Utils.initSystemBar(this, toolbar);
     }
 
     @Override
@@ -187,13 +187,13 @@ public class SecurityCheckActivity extends BaseActivity implements ViewPager.OnP
         } else if (id == page_num.getId()) {
             String[] title = new String[16];
             contents.toArray(title);
-            title[15]="处理意见";
+            title[15] = "处理意见";
             new AlertView(null, null, "取消", null,
                     title, this, AlertView.Style.ActionSheet,
                     new OnItemClickListener() {
                         @Override
                         public void onItemClick(Object o, int position) {
-                        viewPager.setCurrentItem(position,false);
+                            viewPager.setCurrentItem(position, false);
                         }
                     }).show();
         }
@@ -214,5 +214,10 @@ public class SecurityCheckActivity extends BaseActivity implements ViewPager.OnP
         public int getCount() {
             return fragments.size();
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        finish();
     }
 }

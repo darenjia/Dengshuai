@@ -4,6 +4,15 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#dcdbdb"
+        android:gravity="center"
+        android:padding="10dp"
+        android:text="安全检查"
+        android:textSize="18sp" />
+
     <LinearLayout
         style="@style/table_style"
         android:layout_width="match_parent"
@@ -171,6 +180,30 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="工程信息" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#dcdbdb"
+        android:orientation="horizontal">
+
+        <Button
+            style="@style/button_layout"
+            android:layout_gravity="center"
+            android:background="#F2F2F2"
+            android:text="预览" />
+
+        <TextView
+            android:layout_width="2dp"
+            android:layout_height="match_parent"
+            android:background="#898383" />
+
+        <Button
+            style="@style/button_layout"
+            android:layout_gravity="end"
+            android:background="#dcdbdb"
+            android:text="检查" />
     </LinearLayout>
 
 </LinearLayout>

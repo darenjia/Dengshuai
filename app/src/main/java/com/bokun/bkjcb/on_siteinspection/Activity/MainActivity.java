@@ -4,9 +4,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.database.DataSetObserver;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -23,11 +21,9 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
-import android.widget.TextView;
 
+import com.bokun.bkjcb.on_siteinspection.Adapter.ExpandableListViewAdapter;
 import com.bokun.bkjcb.on_siteinspection.Http.HttpManager;
 import com.bokun.bkjcb.on_siteinspection.Http.HttpRequestVo;
 import com.bokun.bkjcb.on_siteinspection.Http.RequestListener;
@@ -36,7 +32,9 @@ import com.bokun.bkjcb.on_siteinspection.Utils.AppManager;
 import com.bokun.bkjcb.on_siteinspection.Utils.LogUtil;
 import com.bokun.bkjcb.on_siteinspection.View.ConstructionDetailView;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /*
@@ -50,8 +48,6 @@ public class MainActivity extends BaseActivity
     private ConstraintLayout contentView;
     private SwipeRefreshLayout refreshLayout;
     private Map<String, View> viewMap;
-    final String[] name = {"检查计划1", "检查计划2", "检查计划3"};
-    final String[][] ids = {{"工程1", "工程2", "工程3"}, {"工程1", "工程2", "工程3"}, {"工程1", "工程2", "工程3"}};
     @SuppressLint("HandlerLeak")
     private Handler mHandler = new Handler() {
         @Override
@@ -128,7 +124,7 @@ public class MainActivity extends BaseActivity
         contentView = (ConstraintLayout) findViewById(R.id.content_main);
 //        contentView = (ConstraintLayout) View.inflate(this,R.layout.content_main,null);
 
-        click_first_menu(name, ids);
+        click_first_menu();
     }
 
     @Override
@@ -144,7 +140,7 @@ public class MainActivity extends BaseActivity
             @Override
             public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
                 LogUtil.logD(TAG, "click" + childPosition + ":" + groupPosition);
-                createDailog().show();
+                createDailog();
                 return false;
             }
         });
@@ -195,7 +191,7 @@ public class MainActivity extends BaseActivity
 
         if (id == R.id.nav_check_plan) {
             toolbar.setTitle("检查计划");
-            click_first_menu(name, ids);
+            click_first_menu();
         } else if (id == R.id.nav_info_check) {
             toolbar.setTitle("工程信息查询");
         } else if (id == R.id.nav_map) {
@@ -217,7 +213,7 @@ public class MainActivity extends BaseActivity
         return true;
     }
 
-    private void click_first_menu(String[] name, String[][] ids) {
+    private void click_first_menu() {
         toolbar.setTitle("检查计划");
         contentView.removeAllViews();
         View view = viewMap.get("first");
@@ -225,7 +221,7 @@ public class MainActivity extends BaseActivity
             view = View.inflate(this, R.layout.content_plan, null);
         }
         initPlanLayout(view);
-        setExpandableListView(name, ids, view);
+        setExpandableListView(view);
         viewMap.put("first", view);
         contentView.addView(view);
     }
@@ -256,106 +252,19 @@ public class MainActivity extends BaseActivity
     /*
     * 测试检查计划显示
     * */
-    private void setExpandableListView(final String[] name, final String[][] ids, View view) {
+    private void setExpandableListView(View view) {
         listview = (ExpandableListView) view.findViewById(R.id.plan_list);
         int width = getWindowManager().getDefaultDisplay().getWidth();
         listview.setIndicatorBounds(width - 70, width - 30);
-        listview.setAdapter(new ExpandableListAdapter() {
-
-            @Override
-            public void registerDataSetObserver(DataSetObserver observer) {
-
-            }
-
-            @Override
-            public void unregisterDataSetObserver(DataSetObserver observer) {
-
-            }
-
-            @Override
-            public int getGroupCount() {
-                return name.length;
-            }
-
-            @Override
-            public int getChildrenCount(int groupPosition) {
-                return ids[groupPosition].length;
-            }
-
-            @Override
-            public Object getGroup(int groupPosition) {
-                return name[groupPosition];
-            }
-
-            @Override
-            public Object getChild(int groupPosition, int childPosition) {
-                return ids[groupPosition][childPosition];
-            }
-
-            @Override
-            public long getGroupId(int groupPosition) {
-                return groupPosition;
-            }
-
-            @Override
-            public long getChildId(int groupPosition, int childPosition) {
-                return childPosition;
-            }
-
-            @Override
-            public boolean hasStableIds() {
-                return false;
-            }
-
-            @Override
-            public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
-
-                TextView txtview = (TextView) View.inflate(context, R.layout.expandable_group_item_view, null);
-                txtview.setText(name[groupPosition]);
-                return txtview;
-            }
-
-            @Override
-            public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
-                TextView txtview = new TextView(MainActivity.this);
-
-                txtview.setText(ids[groupPosition][childPosition]);
-                return txtview;
-            }
-
-            @Override
-            public boolean isChildSelectable(int groupPosition, int childPosition) {
-                return true;
-            }
-
-            @Override
-            public boolean areAllItemsEnabled() {
-                return false;
-            }
-
-            @Override
-            public boolean isEmpty() {
-                return false;
-            }
-
-            @Override
-            public void onGroupExpanded(int groupPosition) {
-            }
-
-            @Override
-            public void onGroupCollapsed(int groupPosition) {
-            }
-
-            @Override
-            public long getCombinedChildId(long groupId, long childId) {
-                return childId;
-            }
-
-            @Override
-            public long getCombinedGroupId(long groupId) {
-                return groupId;
-            }
-        });
+        List<String> list = new ArrayList<>();
+        list.add("检查计划1");
+        list.add("检查计划2");
+        list.add("检查计划3");
+        List<List<String>> lists = new ArrayList<>();
+        lists.add(list);
+        lists.add(list);
+        lists.add(list);
+        listview.setAdapter(new ExpandableListViewAdapter(this,list,lists));
     }
 
     public static void ComeToMainActivity(Activity activity) {
@@ -369,20 +278,23 @@ public class MainActivity extends BaseActivity
         mHandler.sendEmptyMessage(i);
     }
 
-    private Dialog createDailog() {
+    private void createDailog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
-        ConstructionDetailView view = new ConstructionDetailView(this);
-        builder.setView(view.getConstructionDetailView());
-        builder.setTitle("地下空间日常安全检查");
-        builder.setPositiveButton("检查", new DialogInterface.OnClickListener() {
+        ConstructionDetailView constructionDetailView = new ConstructionDetailView(this);
+        View view = constructionDetailView.getConstructionDetailView(new View.OnClickListener() {
             @Override
-            public void onClick(DialogInterface dialog, int which) {
-                SecurityCheckActivity.ComeToSecurityCheckActivity(MainActivity.this);
+            public void onClick(View v) {
+                if (v.getId() == R.id.btn_scan){
+                    SecurityCheckActivity.ComeToSecurityCheckActivity(MainActivity.this);
+                }else {
+                    SecurityCheckActivity.ComeToSecurityCheckActivity(MainActivity.this);
+                }
             }
         });
+        builder.setView(view);
         Dialog dialog = builder.create();
         dialog.setCanceledOnTouchOutside(true);
-        return dialog;
+        dialog.show();
     }
 }

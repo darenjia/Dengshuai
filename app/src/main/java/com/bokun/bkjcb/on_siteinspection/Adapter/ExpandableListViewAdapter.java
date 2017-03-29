@@ -5,7 +5,9 @@ import android.database.DataSetObserver;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ExpandableListAdapter;
-import android.widget.ExpandableListView;
+import android.widget.TextView;
+
+import com.bokun.bkjcb.on_siteinspection.R;
 
 import java.util.List;
 
@@ -72,22 +74,26 @@ public class ExpandableListViewAdapter implements ExpandableListAdapter {
 
     @Override
     public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
-        return null;
+        TextView txtview = (TextView) View.inflate(context, R.layout.expandable_group_item_view, null);
+        txtview.setText(plan_list.get(groupPosition));
+        return txtview;
     }
 
     @Override
     public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
-        return null;
+        TextView txtview = (TextView) View.inflate(context, R.layout.expandable_child_item_view, null);
+        txtview.setText(plan_info.get(groupPosition).get(childPosition));
+        return txtview;
     }
 
     @Override
     public boolean isChildSelectable(int groupPosition, int childPosition) {
-        return false;
+        return true;
     }
 
     @Override
     public boolean areAllItemsEnabled() {
-        return false;
+        return true;
     }
 
     @Override

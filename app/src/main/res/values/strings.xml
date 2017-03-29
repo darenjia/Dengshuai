@@ -4,7 +4,7 @@
     <string name="title_activity_login">登录</string>
     <string name="title_activity_main">登录</string>
     <string name="title_activity_security">安全检查</string>
-    <string name="button_submit">安全检查</string>
+    <string name="button_submit">提交</string>
 
     <!-- Strings related to login -->
     <string name="prompt_username">用户名</string>
@@ -38,4 +38,6 @@
     <string name="mis_error_no_permission_camera">无法使用相机，请在权限管理中设置权限</string>
     <string name="mis_error_no_permission_audio">无法使用录音机，请在权限管理中设置权限</string>
     <string name="mis_error_no_permission_sdcard">无法使用SD卡，请在权限管理中设置权限</string>
+    <string name="btn_scan">预览</string>
+    <string name="btn_check">检查</string>
 </resources>
