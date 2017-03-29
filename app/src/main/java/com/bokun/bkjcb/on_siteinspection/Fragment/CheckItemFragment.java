@@ -1,6 +1,7 @@
 package com.bokun.bkjcb.on_siteinspection.Fragment;
 
 import android.Manifest;
+import android.app.AlertDialog;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -33,6 +34,7 @@ import com.bokun.bkjcb.on_siteinspection.Utils.Utils;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Map;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -53,9 +55,11 @@ public class CheckItemFragment extends BaseFragment implements View.OnClickListe
     private String imagePath = "picture/";
     private String videoPath = "video/";
     private String audioPath = "audio/";
-    Uri uri = null;
+    private Uri uri = null;
     private File video;
     private File audio;
+    private Map<String, String> result;
+    private AlertDialog remarkDialiog;
 
     @Override
     public View initView() {
@@ -68,23 +72,25 @@ public class CheckItemFragment extends BaseFragment implements View.OnClickListe
     @Override
     public void initData() {
         String content = getArguments().getString("content");
+        result = (Map<String, String>) getArguments().get("result");
         viewHolder.camera_view.setOnClickListener(this);
         viewHolder.video_view.setOnClickListener(this);
         viewHolder.audio_view.setOnClickListener(this);
+        viewHolder.btn_remark.setOnClickListener(this);
         viewHolder.txt_content.setText(content);
-        if (ContextCompat.checkSelfPermission(getContext(),Manifest.permission_group.STORAGE)!= PackageManager.PERMISSION_GRANTED) {
-            path = Environment.getExternalStorageDirectory()+"/Bokun/";
+        if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission_group.STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            path = Environment.getExternalStorageDirectory() + "/Bokun/";
             File file = new File(path);
             if (!file.exists()) {
                 file.mkdirs();
             }
-        }else {
+        } else {
             creatSnackBar(R.string.mis_error_no_permission_sdcard);
         }
         viewHolder.mRdaioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
-                LogUtil.logI("id:"+checkedId);
+                LogUtil.logI("id:" + checkedId);
             }
         });
     }
@@ -130,6 +136,27 @@ public class CheckItemFragment extends BaseFragment implements View.OnClickListe
                 startAction(intent, video, REQUESR_CODE_VIDEO);
                 break;
             case R.id.check_content_btn_remark:
+                AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                View view = View.inflate(getContext(), R.layout.remark_view, null);
+                TextView textView = (TextView)view.findViewById(R.id.check_result_remark);
+                final String value = textView.getText().toString();
+                view.findViewById(R.id.btn_save).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (remarkDialiog != null) {
+                            remarkDialiog.dismiss();
+                        }
+                        result.put("remark",value);
+                        viewHolder.comment_word.setText(value);
+                    }
+                });
+                builder.setView(view);
+                builder.setCancelable(true);
+                remarkDialiog = builder.create();
+                remarkDialiog.show();
+                remarkDialiog.setCanceledOnTouchOutside(false);
+                break;
+            case R.id.btn_save:
                 break;
         }
     }
@@ -186,13 +213,8 @@ public class CheckItemFragment extends BaseFragment implements View.OnClickListe
                  * 如果图太大会造成内存溢出（OOM），因此此种方法会默认给图片尽心压缩
                  */
                 Bundle bundle = data.getExtras();
-//                String path = bundle.getString("picpath");
                 LogUtil.logI("bitmap" + (bundle.get("data") == null));
                 Bitmap bitmap = (Bitmap) bundle.get("data");
-//                Bitmap bitmap = getCutBitmap(sdcardTempFile.getAbsolutePath());
-
-//                Bitmap bitmap = BitmapFactory.decodeFile(path);
-//                bitmap = Utils.compressBitmap(sdcardTempFile.getAbsolutePath());
                 ImageView mImageView = new ImageView(getContext());
                 mImageView.setImageBitmap(bitmap);
                 LogUtil.logI("size:" + bitmap.getByteCount());

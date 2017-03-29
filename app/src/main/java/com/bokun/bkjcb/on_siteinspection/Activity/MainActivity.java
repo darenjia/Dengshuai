@@ -81,6 +81,7 @@ public class MainActivity extends BaseActivity
     };
     private Toolbar toolbar;
     public ExpandableListView listview;
+    private Dialog dialog;
 
 
     @Override
@@ -264,7 +265,7 @@ public class MainActivity extends BaseActivity
         lists.add(list);
         lists.add(list);
         lists.add(list);
-        listview.setAdapter(new ExpandableListViewAdapter(this,list,lists));
+        listview.setAdapter(new ExpandableListViewAdapter(this, list, lists));
     }
 
     public static void ComeToMainActivity(Activity activity) {
@@ -285,16 +286,27 @@ public class MainActivity extends BaseActivity
         View view = constructionDetailView.getConstructionDetailView(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (v.getId() == R.id.btn_scan){
+                if (v.getId() == R.id.btn_scan) {
                     SecurityCheckActivity.ComeToSecurityCheckActivity(MainActivity.this);
-                }else {
+                } else {
                     SecurityCheckActivity.ComeToSecurityCheckActivity(MainActivity.this);
                 }
             }
         });
         builder.setView(view);
-        Dialog dialog = builder.create();
+        builder.setCancelable(true);
+        dialog = builder.create();
         dialog.setCanceledOnTouchOutside(true);
         dialog.show();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if(dialog !=null){
+            if (dialog.isShowing()){
+                dialog.dismiss();
+            }
+        }
     }
 }

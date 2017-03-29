@@ -1,6 +1,8 @@
 package com.bokun.bkjcb.on_siteinspection.Activity;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
@@ -90,7 +92,7 @@ public class SecurityCheckActivity extends BaseActivity implements ViewPager.OnP
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                finish();
+                showDialog();
             }
         });
         viewPager.addOnPageChangeListener(this);
@@ -218,6 +220,26 @@ public class SecurityCheckActivity extends BaseActivity implements ViewPager.OnP
 
     @Override
     public void onBackPressed() {
-        finish();
+        showDialog();
+    }
+
+    private void showDialog() {
+        new AlertDialog.Builder(this)
+                .setTitle("提示")
+                .setMessage("检查还未完成，是否退出？")
+                .setCancelable(true)
+                .setPositiveButton("退出", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        finish();
+                    }
+                })
+                .setNegativeButton("继续", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                })
+                .show();
     }
 }
