@@ -80,9 +80,9 @@
                 <TextView
                     android:id="@+id/check_content_info"
                     style="@style/base_layout"
-                    android:text=""
                     android:maxLines="2"
-                    android:ellipsize="end"/>
+                    android:ellipsize="end"
+                    android:paddingLeft="10dp"/>
 
                 <TextView
                     android:id="@+id/check_content_pic_title"
@@ -90,14 +90,14 @@
                     android:text="@string/image_file"
                     android:visibility="gone" />
 
-                <LinearLayout
+                <HorizontalScrollView
                     android:id="@+id/check_content_pic"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:gravity="left"
-                    android:orientation="vertical">
+                    android:gravity="center"
+                    android:orientation="horizontal">
 
-                </LinearLayout>
+                </HorizontalScrollView>
 
                 <TextView
                     android:id="@+id/check_content_vdo_title"
@@ -105,14 +105,14 @@
                     android:text="@string/video_file"
                     android:visibility="gone" />
 
-                <LinearLayout
+                <HorizontalScrollView
                     android:id="@+id/check_content_video"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="left"
-                    android:orientation="vertical">
+                    android:orientation="horizontal">
 
-                </LinearLayout>
+                </HorizontalScrollView>
 
                 <TextView
                     android:id="@+id/check_content_ado_title"
@@ -120,14 +120,14 @@
                     android:text="@string/audio_file"
                     android:visibility="gone" />
 
-                <LinearLayout
+                <HorizontalScrollView
                     android:id="@+id/check_content_audio"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="left"
-                    android:orientation="vertical">
+                    android:orientation="horizontal">
 
-                </LinearLayout>
+                </HorizontalScrollView>
             </LinearLayout>
         </ScrollView>
 
@@ -166,7 +166,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="@color/colorNone"
-                android:text="备注" />
+                android:text="备注"
+                android:textColor="#8a8a8a"/>
 
         </LinearLayout>
     </LinearLayout>

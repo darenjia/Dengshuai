@@ -9,6 +9,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.media.MediaMetadataRetriever;
+import android.media.ThumbnailUtils;
 import android.os.Build;
 import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
@@ -48,6 +49,27 @@ public class Utils {
         return BitmapFactory.decodeFile(path, options);
     }
 
+    public static Bitmap compressBitmap(String path, int w, int h) {
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(path, options);
+        int height = options.outHeight;
+        int width = options.outWidth;
+        int inSampleSize = 1;
+        int reqHeight = 800;
+        int reqWidth = 480;
+        if (height < reqHeight || width > reqWidth) {
+            final int heightRatio = Math.round((float) height / (float) reqHeight);
+            final int widthRatio = Math.round((float) width / (float) reqWidth);
+            inSampleSize = heightRatio < widthRatio ? heightRatio : widthRatio;
+        }
+        options.inSampleSize = inSampleSize;
+        options.inJustDecodeBounds = false;
+        Bitmap mBitmap = BitmapFactory.decodeFile(path, options);
+        mBitmap = ThumbnailUtils.extractThumbnail(mBitmap, w, h);
+        return mBitmap;
+    }
+
     public static Bitmap compressBitmap(Bitmap bitmap) {
         Bitmap bm;
         Matrix matrix = new Matrix();
@@ -81,13 +103,17 @@ public class Utils {
         return bitmap;
     }
 
-    public static void copyFile(String oldPath, String newPath) {
+    public static void copyFile(String oldPath, File newFlie) {
         try {
             File oldfile = new File(oldPath);
             if (oldfile.exists()) { //文件存在时
                 if (oldfile.isFile()) {
+                    if (!newFlie.exists()) {
+                        newFlie.mkdirs();
+                        newFlie.createNewFile();
+                    }
                     InputStream inStream = new FileInputStream(oldPath); //读入原文件
-                    FileOutputStream fs = new FileOutputStream(newPath);
+                    FileOutputStream fs = new FileOutputStream(newFlie);
                     byte[] buffer = new byte[4 * 1024];
                     int length;
                     while ((length = inStream.read(buffer)) != -1) {
@@ -98,37 +124,37 @@ public class Utils {
                 }
             }
         } catch (Exception e) {
-            System.out.println("文件操作出错");
             e.printStackTrace();
 
         }
 
     }
+
     public static void initSystemBar(Activity activity, Toolbar mToolbar) {
         compat6(activity);
-        initToolBar(activity,mToolbar);
+        initToolBar(activity, mToolbar);
     }
 
     /**
      * 如果布局文件里面没添加android:fitsSystemWindows="true"的话,就需要调用该方法
      * 该方法是让toolbar加上statubar高度,然后顶上去
+     *
      * @param activity
      * @param toolbar
      */
 
-    private static void initToolBar(Activity activity,Toolbar toolbar) {
+    private static void initToolBar(Activity activity, Toolbar toolbar) {
         int mStatuBarHeight = getStatusBarHeight(activity);
 //        int mToolBarHeight = (int) (getResources().getDimension(R.dimen.home_toolbar_hei) + mStatuBarHeight);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             ViewGroup.LayoutParams param4 = toolbar.getLayoutParams();
-            param4.height = param4.height+mStatuBarHeight;
+            param4.height = param4.height + mStatuBarHeight;
             toolbar.setLayoutParams(param4);
             toolbar.setPadding(0, mStatuBarHeight, 0, 0);
         }
     }
 
-    public static void compat6(Activity activity)
-    {
+    public static void compat6(Activity activity) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
 //透明状态栏
             activity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
@@ -157,6 +183,7 @@ public class Utils {
 
     /**
      * 获取虚拟按键栏高度
+     *
      * @param context
      * @return
      */
@@ -172,13 +199,15 @@ public class Utils {
         }
         return result;
     }
+
     /**
      * 判断底部navigator是否已经显示
+     *
      * @param context
      * @return
      */
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
-    public static boolean hasNavBar(Context context){
+    public static boolean hasNavBar(Context context) {
         WindowManager windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         Display d = windowManager.getDefaultDisplay();
 

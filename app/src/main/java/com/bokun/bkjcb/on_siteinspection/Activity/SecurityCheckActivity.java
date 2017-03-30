@@ -18,6 +18,7 @@ import android.widget.TextView;
 
 import com.bigkoo.alertview.AlertView;
 import com.bigkoo.alertview.OnItemClickListener;
+import com.bokun.bkjcb.on_siteinspection.Domain.SerializableHashMap;
 import com.bokun.bkjcb.on_siteinspection.Fragment.CheckItemFragment;
 import com.bokun.bkjcb.on_siteinspection.Fragment.LastFragment;
 import com.bokun.bkjcb.on_siteinspection.R;
@@ -33,7 +34,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by BKJCB on 2017/3/20.
@@ -48,6 +51,7 @@ public class SecurityCheckActivity extends BaseActivity implements ViewPager.OnP
     private TextView page_num;
     private List<Fragment> fragments;
     private List<String> contents;
+    private List<Map<String, String>> results;
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -67,18 +71,38 @@ public class SecurityCheckActivity extends BaseActivity implements ViewPager.OnP
         btn_next = (ImageButton) findViewById(R.id.btn_next);
         page_num = (TextView) findViewById(R.id.txt_page);
 
+        /*
+        * 判断改检查是否检查*/
+        boolean isCheck = getIntent().getBooleanExtra("isCheck", false);
+        if (isCheck) {
+
+        } else {
+            results = new ArrayList<>();
+        }
         fragments = new ArrayList<>();
         contents = getCheckItems();
-        for (int i = 0; i < contents.size(); i++) {
+        for (int i = 0; i < contents.size() + 1; i++) {
             Fragment fragment = null;
-            fragment = new CheckItemFragment();
             Bundle bundle = new Bundle();
-            bundle.putString("content", contents.get(i));
+            SerializableHashMap hashMap = null;
+            if (i < contents.size()) {
+                fragment = new CheckItemFragment();
+                bundle.putString("content", contents.get(i));
+            } else {
+                fragment = new LastFragment();
+            }
+            if (isCheck) {
+            } else {
+                hashMap = new SerializableHashMap();
+                HashMap<String, String> result = new HashMap<>();
+                hashMap.setMap(result);
+                results.add(hashMap.getMap());
+            }
+            bundle.putSerializable("result", hashMap.getMap());
             fragment.setArguments(bundle);
             fragments.add(fragment);
         }
-        Fragment fragment = new LastFragment();
-        fragments.add(fragment);
+
         LogUtil.logI("size:" + fragments.size());
         PagerAdapter pagerAdapter = new PagerAdapter(getSupportFragmentManager());
         viewPager.setAdapter(pagerAdapter);
