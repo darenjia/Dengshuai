@@ -90,14 +90,14 @@
                     android:text="@string/image_file"
                     android:visibility="gone" />
 
-                <HorizontalScrollView
+                <LinearLayout
                     android:id="@+id/check_content_pic"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center"
                     android:orientation="horizontal">
 
-                </HorizontalScrollView>
+                </LinearLayout>
 
                 <TextView
                     android:id="@+id/check_content_vdo_title"
@@ -105,14 +105,14 @@
                     android:text="@string/video_file"
                     android:visibility="gone" />
 
-                <HorizontalScrollView
+                <LinearLayout
                     android:id="@+id/check_content_video"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="left"
                     android:orientation="horizontal">
 
-                </HorizontalScrollView>
+                </LinearLayout>
 
                 <TextView
                     android:id="@+id/check_content_ado_title"
@@ -120,14 +120,14 @@
                     android:text="@string/audio_file"
                     android:visibility="gone" />
 
-                <HorizontalScrollView
+                <LinearLayout
                     android:id="@+id/check_content_audio"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="left"
                     android:orientation="horizontal">
 
-                </HorizontalScrollView>
+                </LinearLayout>
             </LinearLayout>
         </ScrollView>
 
