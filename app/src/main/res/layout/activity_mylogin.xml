@@ -81,7 +81,8 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
                 android:background="@color/colorNone"
-                android:text="@string/action_change_user" />
+                android:text="@string/action_change_user"
+                android:textColor="#8a8a8a"/>
         </RelativeLayout>
     </LinearLayout>
 
