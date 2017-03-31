@@ -18,10 +18,12 @@ import android.widget.TextView;
 
 import com.bigkoo.alertview.AlertView;
 import com.bigkoo.alertview.OnItemClickListener;
+import com.bokun.bkjcb.on_siteinspection.Domain.CheckPlan;
 import com.bokun.bkjcb.on_siteinspection.Domain.SerializableHashMap;
 import com.bokun.bkjcb.on_siteinspection.Fragment.CheckItemFragment;
 import com.bokun.bkjcb.on_siteinspection.Fragment.LastFragment;
 import com.bokun.bkjcb.on_siteinspection.R;
+import com.bokun.bkjcb.on_siteinspection.SQLite.DateUtil;
 import com.bokun.bkjcb.on_siteinspection.Utils.LogUtil;
 import com.bokun.bkjcb.on_siteinspection.Utils.Utils;
 
@@ -51,11 +53,14 @@ public class SecurityCheckActivity extends BaseActivity implements ViewPager.OnP
     private TextView page_num;
     private List<Fragment> fragments;
     private List<String> contents;
-    private List<Map<String, String>> results;
+    private List<Map<String, Object>> results;
+    private CheckPlan plan;
+    private boolean isChecked;
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void initView() {
+        plan = (CheckPlan) getIntent().getExtras().getSerializable("checkplan");
         setContentView(R.layout.activity_securitycheck);
         toolbar = (Toolbar) findViewById(R.id.toolbar_secAct);
         toolbar.setTitle("安全检查");
@@ -73,12 +78,9 @@ public class SecurityCheckActivity extends BaseActivity implements ViewPager.OnP
 
         /*
         * 判断改检查是否检查*/
-        boolean isCheck = getIntent().getBooleanExtra("isCheck", false);
-        if (isCheck) {
+        isChecked = DateUtil.queryCheckPlanState(this, plan.getState()) != 0;
 
-        } else {
-            results = new ArrayList<>();
-        }
+        results = DateUtil.readDate(this, plan.getIdentifier());
         fragments = new ArrayList<>();
         contents = getCheckItems();
         for (int i = 0; i < contents.size() + 1; i++) {
@@ -89,15 +91,24 @@ public class SecurityCheckActivity extends BaseActivity implements ViewPager.OnP
                 fragment = new CheckItemFragment();
                 bundle.putString("content", contents.get(i));
             } else {
-                fragment = new LastFragment();
+                LastFragment lastFragment = new LastFragment();
+                lastFragment.setListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        LogUtil.logI("保存数据");
+                    }
+                });
+                fragment = lastFragment;
             }
-            if (isCheck) {
+            hashMap = new SerializableHashMap();
+            Map<String, Object> result;
+            if (isChecked) {
+                result = results.get(i);
             } else {
-                hashMap = new SerializableHashMap();
-                HashMap<String, String> result = new HashMap<>();
-                hashMap.setMap(result);
-                results.add(hashMap.getMap());
+                result = new HashMap<>();
             }
+            hashMap.setMap((HashMap<String, Object>) result);
+            results.add(hashMap.getMap());
             bundle.putSerializable("result", hashMap.getMap());
             fragment.setArguments(bundle);
             fragments.add(fragment);
@@ -127,10 +138,30 @@ public class SecurityCheckActivity extends BaseActivity implements ViewPager.OnP
 
     @Override
     protected void loadData() {
+        if (isChecked) {
+            new AlertDialog.Builder(this)
+                    .setTitle("提示")
+                    .setMessage("检测到该项检查已经执行过，是否继续执行？")
+                    .setPositiveButton("继续检查", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+
+                        }
+                    })
+                    .setNegativeButton("重新检查", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+
+                        }
+                    })
+                    .create()
+                    .show();
+
+        }
         page_num.setText(1 + "/" + fragments.size());
     }
 
-    public static void ComeToSecurityCheckActivity(Activity activity) {
+    public static void ComeToSecurityCheckActivity(Activity activity, Bundle bundle) {
         Intent intent = new Intent(activity, SecurityCheckActivity.class);
         activity.startActivity(intent);
     }
@@ -265,5 +296,9 @@ public class SecurityCheckActivity extends BaseActivity implements ViewPager.OnP
                     }
                 })
                 .show();
+    }
+
+    private void initData(CheckPlan plan) {
+        results = DateUtil.readDate(this, plan.getIdentifier());
     }
 }

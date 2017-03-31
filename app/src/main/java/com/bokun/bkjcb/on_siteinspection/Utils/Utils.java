@@ -99,7 +99,6 @@ public class Utils {
                 e.printStackTrace();
             }
         }
-        bitmap = Utils.compressBitmap(bitmap);
         return bitmap;
     }
 

@@ -19,6 +19,7 @@
             android:paddingTop="10dp"
             />
         <EditText
+            android:id="@+id/lastFragment_idea"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
@@ -41,6 +42,7 @@
                 android:gravity="center"
                 />
             <TextView
+                android:id="@+id/lastFragment_user"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="张三"
@@ -54,6 +56,7 @@
                 android:layout_weight="2"
                 android:gravity="center"/>
             <TextView
+                android:id="@+id/lastFragment_date"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="2017-3-28"

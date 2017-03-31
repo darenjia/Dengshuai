@@ -36,7 +36,9 @@ import com.bokun.bkjcb.on_siteinspection.View.ImagePreview;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 import static android.app.Activity.RESULT_OK;
@@ -61,8 +63,11 @@ public class CheckItemFragment extends BaseFragment implements View.OnClickListe
     private Uri uri = null;
     private File video;
     private File audio;
-    private Map<String, String> result;
+    private Map<String, Object> result;
     private AlertDialog remarkDialiog;
+    private List<String> imagePaths;
+    private List<String> videoPaths;
+    private List<String> audioPaths;
 
     @Override
     public View initView() {
@@ -75,7 +80,13 @@ public class CheckItemFragment extends BaseFragment implements View.OnClickListe
     @Override
     public void initData() {
         String content = getArguments().getString("content");
-        result = (Map<String, String>) getArguments().get("result");
+        result = (Map<String, Object>) getArguments().get("result");
+        imagePaths = new ArrayList<>();
+        videoPaths = new ArrayList<>();
+        audioPaths = new ArrayList<>();
+        result.put("imagePaths", imagePaths);
+        result.put("videoPaths", videoPaths);
+        result.put("audioPaths", audioPaths);
         viewHolder.camera_view.setOnClickListener(this);
         viewHolder.video_view.setOnClickListener(this);
         viewHolder.audio_view.setOnClickListener(this);
@@ -104,20 +115,11 @@ public class CheckItemFragment extends BaseFragment implements View.OnClickListe
         Intent intent;
         switch (v.getId()) {
             case R.id.check_content_btn_camera:
-//                Intent intent = new Intent(getContext(), TestActivity.class);
-//                startActivityForResult(intent, 1);
-//                Intent intent1 = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-//                // 启动相机
-//                startActivityForResult(intent1, 1);
                 intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                 String picName = imagePath + (new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()))
                         + ".jpg";
-                LogUtil.logI(path);
                 image = new File(path, picName);
                 creatFile(image);
-                LogUtil.logI(image.getAbsolutePath());
-                /*intent.putExtra("output", Uri.fromFile(sdcardTempFile));
-                startActivityForResult(intent, 100);*/
                 startAction(intent, image, REQUESR_CODE_TAKEPHOTO);
                 break;
             case R.id.check_content_btn_audio:
@@ -143,11 +145,12 @@ public class CheckItemFragment extends BaseFragment implements View.OnClickListe
                 creatEditCommentDialog();
                 break;
             case R.id.check_content_pic:
-                creatImageDialog();
+                creatImageDialog(viewHolder.commtent_pic,imagePaths,"imagePaths");
                 break;
             case R.id.check_content_audio:
                 break;
             case R.id.check_content_video:
+                creatImageDialog(viewHolder.commtent_video,videoPaths,"videoPaths");
                 break;
         }
     }
@@ -155,7 +158,6 @@ public class CheckItemFragment extends BaseFragment implements View.OnClickListe
     public class ViewHolder {
 
         private TextView txt_content;
-
         private RadioGroup mRdaioGroup;
         private ImageView camera_view;
         private ImageView audio_view;
@@ -169,6 +171,7 @@ public class CheckItemFragment extends BaseFragment implements View.OnClickListe
         private TextView image_title;
         private TextView video_title;
         private TextView audio_title;
+
         public ViewHolder() {
             LogUtil.logI("new ViewHolder");
             initWidgets();
@@ -213,12 +216,7 @@ public class CheckItemFragment extends BaseFragment implements View.OnClickListe
                 mImageView.setImageBitmap(bitmap);
                 viewHolder.image_title.setVisibility(View.VISIBLE);
                 viewHolder.commtent_pic.addView(mImageView, params);
-                if (result.get("imagePath")==null){
-                    result.put("imagePath",image.getAbsolutePath());
-                }else {
-                    String path = result.get("imagePath")+","+image.getAbsolutePath();
-                    result.put("imagePath",path);
-                }
+                imagePaths.add(image.getAbsolutePath());
             } else if (requestCode == REQUESR_CODE_TAKEPHOTO) {
                 LogUtil.logI("拍完进入剪裁");
                 Intent intent = new Intent("com.android.camera.action.CROP");
@@ -247,6 +245,7 @@ public class CheckItemFragment extends BaseFragment implements View.OnClickListe
                 LogUtil.logI("size:" + bitmap.getByteCount());
                 viewHolder.video_title.setVisibility(View.VISIBLE);
                 viewHolder.commtent_video.addView(mImageView, params);
+                videoPaths.add(video.getAbsolutePath());
             } else if (requestCode == REQUESR_CODE_RECORD) {
                 String filePath;
                 try {
@@ -265,6 +264,7 @@ public class CheckItemFragment extends BaseFragment implements View.OnClickListe
                     mImageView.setImageResource(R.drawable.audio);
                     viewHolder.audio_title.setVisibility(View.VISIBLE);
                     viewHolder.commtent_audio.addView(mImageView, params);
+                    audioPaths.add(audio.getAbsolutePath());
                 }
             }
         }
@@ -349,9 +349,25 @@ public class CheckItemFragment extends BaseFragment implements View.OnClickListe
         remarkDialiog.setCanceledOnTouchOutside(false);
     }
 
-    private void creatImageDialog() {
+    private void creatImageDialog(final LinearLayout layout, final List<String> paths, String type) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        View view = new ImagePreview(getContext()).getImagePreviewView(result.get("imagePath"));
+        final ImagePreview preview = new ImagePreview(getContext());
+        preview.setListener(new ImagePreview.ButtonClickListener() {
+
+            @Override
+            public void onDelete() {
+                layout.removeViewAt(preview.getPosition());
+                paths.remove(preview.getPosition());
+            }
+
+            @Override
+            public void onCancel() {
+                if (remarkDialiog != null) {
+                    remarkDialiog.dismiss();
+                }
+            }
+        });
+        View view = preview.getImagePreviewView((List<String>) result.get(type));
         builder.setView(view);
         builder.setCancelable(true);
         remarkDialiog = builder.create();

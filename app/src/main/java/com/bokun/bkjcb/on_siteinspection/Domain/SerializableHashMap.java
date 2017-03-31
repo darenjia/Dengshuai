@@ -8,15 +8,15 @@ import java.util.HashMap;
  */
 
 public class SerializableHashMap implements Serializable{
-    private HashMap<String,String> map;
+    private HashMap<String,Object> map;
     public SerializableHashMap(){
     }
 
-    public HashMap<String, String> getMap() {
+    public HashMap<String, Object> getMap() {
         return map;
     }
 
-    public void setMap(HashMap<String, String> map) {
+    public void setMap(HashMap<String, Object> map) {
         this.map = map;
     }
 }

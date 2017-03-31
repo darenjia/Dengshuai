@@ -22,7 +22,12 @@
         android:layout_width="match_parent"
         android:layout_height="300dp"
         />
-
+    <EditText
+        android:id="@+id/preview_name"
+        style="@style/table_content"
+        android:text="210210.jpg"
+        android:enabled="false"
+        />
     <TextView
         android:layout_width="match_parent"
         android:layout_height="2dp"
@@ -33,6 +38,7 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal">
         <Button
+            android:id="@+id/preview_delete"
             style="@style/button_layout"
             android:background="@color/colorNone"
             android:text="删除"/>
@@ -42,6 +48,7 @@
             android:layout_height="match_parent"
             android:background="#898383" />
         <Button
+            android:id="@+id/preview_cancel"
             style="@style/button_layout"
             android:background="@color/colorNone"
             android:text="取消"/>

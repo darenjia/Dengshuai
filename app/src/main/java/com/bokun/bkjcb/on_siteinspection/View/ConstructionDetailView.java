@@ -5,6 +5,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.bokun.bkjcb.on_siteinspection.Domain.CheckPlan;
 import com.bokun.bkjcb.on_siteinspection.R;
 
 
@@ -15,9 +16,11 @@ import com.bokun.bkjcb.on_siteinspection.R;
 public class ConstructionDetailView {
 
     private Context context;
+    private CheckPlan checkPlan;
 
-    public ConstructionDetailView(Context context) {
+    public ConstructionDetailView(Context context, CheckPlan checkPlan) {
         this.context = context;
+        this.checkPlan = checkPlan;
     }
 
     public View getConstructionDetailView(View.OnClickListener listener) {
@@ -33,8 +36,8 @@ public class ConstructionDetailView {
         Button mButtonScan = (Button) view.findViewById(R.id.btn_scan);
         Button mButtonCheck = (Button) view.findViewById(R.id.btn_check);
 
-        mViewName.setText("");
-        mViewId.setText("");
+        mViewName.setText(checkPlan.getName());
+        mViewId.setText(checkPlan.getIdentifier());
         mViewAddress.setText("");
         mViewTel.setText("");
         mViewArea.setText("");

@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.ExpandableListAdapter;
 import android.widget.TextView;
 
+import com.bokun.bkjcb.on_siteinspection.Domain.CheckPlan;
 import com.bokun.bkjcb.on_siteinspection.R;
 
 import java.util.List;
@@ -18,10 +19,10 @@ import java.util.List;
 public class ExpandableListViewAdapter implements ExpandableListAdapter {
 
     private Context context;
-    private List<String> plan_list;
-    private List<List<String>> plan_info;
+    private List<CheckPlan> plan_list;
+    private List<List<CheckPlan>> plan_info;
 
-    public ExpandableListViewAdapter(Context context, List<String> plan_list, List<List<String>> plan_info) {
+    public ExpandableListViewAdapter(Context context, List<CheckPlan> plan_list, List<List<CheckPlan>> plan_info) {
         this.context = context;
         this.plan_list = plan_list;
         this.plan_info = plan_info;
@@ -75,14 +76,14 @@ public class ExpandableListViewAdapter implements ExpandableListAdapter {
     @Override
     public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
         TextView txtview = (TextView) View.inflate(context, R.layout.expandable_group_item_view, null);
-        txtview.setText(plan_list.get(groupPosition));
+        txtview.setText(plan_list.get(groupPosition).getName());
         return txtview;
     }
 
     @Override
     public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
         TextView txtview = (TextView) View.inflate(context, R.layout.expandable_child_item_view, null);
-        txtview.setText(plan_info.get(groupPosition).get(childPosition));
+        txtview.setText(plan_info.get(groupPosition).get(childPosition).getName());
         return txtview;
     }
 

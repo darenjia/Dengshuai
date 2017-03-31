@@ -36,15 +36,23 @@ public class Constants {
             "describtion text" +
             "state Bit" +
             ")";
-    public final static String CREATE_CHECK_ITEM = "create table checkitemInfo(" +
-            "id Integer primary key," +
-            "describtion text" +
+
+    public final static String CREATE_CHECK_PLAN_TABLE = "create table checkplan(" +
+            "identifier Integer primary key," +
+            "name char(30)," +
+            "state int(1)," +
+            "address varchar(50)," +
+            "area varchar(20)," +
+            "type varchar(20)," +
+            "tel varchar(20)," +
+            "manger varchar(50)," +
+            "user varchar(30)" +
             ")";
     public final static String CREATE_CHECK_RESULT = "create table checkResult(" +
             "id Integer primary key," +
             "identifier int(10)," +
             "num int(10)," +
-            "checkresult Bit," +
+            "checkresult int(1)," +
             "comment text," +
             "audio char(100)," +
             "image char(100)," +

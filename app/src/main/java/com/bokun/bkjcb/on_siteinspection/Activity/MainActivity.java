@@ -24,6 +24,7 @@ import android.view.View;
 import android.widget.ExpandableListView;
 
 import com.bokun.bkjcb.on_siteinspection.Adapter.ExpandableListViewAdapter;
+import com.bokun.bkjcb.on_siteinspection.Domain.CheckPlan;
 import com.bokun.bkjcb.on_siteinspection.Http.HttpManager;
 import com.bokun.bkjcb.on_siteinspection.Http.HttpRequestVo;
 import com.bokun.bkjcb.on_siteinspection.Http.RequestListener;
@@ -82,6 +83,8 @@ public class MainActivity extends BaseActivity
     private Toolbar toolbar;
     public ExpandableListView listview;
     private Dialog dialog;
+    private List<CheckPlan> checkPlans;
+    private List<List<CheckPlan>> constuctions;
 
 
     @Override
@@ -141,8 +144,8 @@ public class MainActivity extends BaseActivity
             @Override
             public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
                 LogUtil.logD(TAG, "click" + childPosition + ":" + groupPosition);
-                createDailog();
-                return false;
+                createDailog(constuctions.get(groupPosition).get(childPosition));
+                return true;
             }
         });
     }
@@ -171,12 +174,7 @@ public class MainActivity extends BaseActivity
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
         }
@@ -187,7 +185,6 @@ public class MainActivity extends BaseActivity
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
-        // Handle navigation view item clicks here.
         int id = item.getItemId();
 
         if (id == R.id.nav_check_plan) {
@@ -257,15 +254,20 @@ public class MainActivity extends BaseActivity
         listview = (ExpandableListView) view.findViewById(R.id.plan_list);
         int width = getWindowManager().getDefaultDisplay().getWidth();
         listview.setIndicatorBounds(width - 70, width - 30);
-        List<String> list = new ArrayList<>();
-        list.add("检查计划1");
-        list.add("检查计划2");
-        list.add("检查计划3");
-        List<List<String>> lists = new ArrayList<>();
-        lists.add(list);
-        lists.add(list);
-        lists.add(list);
-        listview.setAdapter(new ExpandableListViewAdapter(this, list, lists));
+        checkPlans = new ArrayList<>();
+        for (int i = 0; i < 3; i++) {
+            CheckPlan checkPlan = new CheckPlan();
+            checkPlan.setIdentifier(21545150 + i);
+            checkPlan.setName("检查计划3" + i);
+            checkPlan.setState(i);
+            checkPlans.add(checkPlan);
+        }
+
+        constuctions = new ArrayList<>();
+        constuctions.add(checkPlans);
+        constuctions.add(checkPlans);
+        constuctions.add(checkPlans);
+        listview.setAdapter(new ExpandableListViewAdapter(this, checkPlans, constuctions));
     }
 
     public static void ComeToMainActivity(Activity activity) {
@@ -279,17 +281,21 @@ public class MainActivity extends BaseActivity
         mHandler.sendEmptyMessage(i);
     }
 
-    private void createDailog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+    private void createDailog(final CheckPlan checkPlan) {
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
-        ConstructionDetailView constructionDetailView = new ConstructionDetailView(this);
+        ConstructionDetailView constructionDetailView = new ConstructionDetailView(this,checkPlan);
         View view = constructionDetailView.getConstructionDetailView(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (v.getId() == R.id.btn_scan) {
-                    SecurityCheckActivity.ComeToSecurityCheckActivity(MainActivity.this);
+                    Bundle bundle = new Bundle();
+                    bundle.putSerializable("checkplan",checkPlan);
+                    SecurityCheckActivity.ComeToSecurityCheckActivity(MainActivity.this,bundle);
                 } else {
-                    SecurityCheckActivity.ComeToSecurityCheckActivity(MainActivity.this);
+                    Bundle bundle = new Bundle();
+                    bundle.putSerializable("checkplan",checkPlan);
+                    SecurityCheckActivity.ComeToSecurityCheckActivity(MainActivity.this,bundle);
                 }
             }
         });
@@ -303,8 +309,8 @@ public class MainActivity extends BaseActivity
     @Override
     protected void onStop() {
         super.onStop();
-        if(dialog !=null){
-            if (dialog.isShowing()){
+        if (dialog != null) {
+            if (dialog.isShowing()) {
                 dialog.dismiss();
             }
         }
