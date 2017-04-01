@@ -46,9 +46,12 @@ public class LocalTools {
         return builder.toString();
     }
 
-    public static List<String> changeToList(String string) {
-        List<String> list = new ArrayList<>();
+    public static ArrayList<String> changeToList(String string) {
+        ArrayList<String> list = new ArrayList<>();
         String[] strings = string.split(",");
+        if (strings.length == 0) {
+            return null;
+        }
         list.addAll(Arrays.asList(strings));
         return list;
     }

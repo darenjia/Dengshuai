@@ -20,14 +20,14 @@
     <string name="table_construction_name">工程名称</string>
     <string name="table_construction_id">工程登记号</string>
     <string name="table_construction_address">工程地址</string>
-    <string name="table_construction_tel">联系电话</string>
+    <!--<string name="table_construction_tel">联系电话</string>-->
     <string name="table_construction_area">建筑面积</string>
     <string name="table_construction_type">使用业态</string>
     <string name="table_construction_manager">管理单位</string>
     <string name="table_construction_user">使用单位</string>
     <string name="result_yes">是</string>
     <string name="result_no">否</string>
-    <string name="result_default">未知</string>
+    <string name="result_default">未检查</string>
 
 
     <string name="navigation_drawer_open">Open navigation drawer</string>

@@ -6,9 +6,10 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
 import com.bokun.bkjcb.on_siteinspection.Domain.CheckResult;
+import com.bokun.bkjcb.on_siteinspection.Utils.LocalTools;
+import com.bokun.bkjcb.on_siteinspection.Utils.LogUtil;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by BKJCB on 2017/3/23.
@@ -30,9 +31,9 @@ public class CheckResultDaolmpl extends CheckResultDao {
         values.put("num", result.getNum());
         values.put("checkresult", result.getResult());
         values.put("comment", result.getComment());
-        values.put("audio", result.getAudioUrls());
-        values.put("image", result.getImageUrls());
-        values.put("video", result.getVideoUrls());
+        values.put("audio", LocalTools.changeToString(result.getAudioUrls()));
+        values.put("image", LocalTools.changeToString(result.getImageUrls()));
+        values.put("video", LocalTools.changeToString(result.getVideoUrls()));
         long isSuccess = database.insert("checkresult", "id", values);
         return isSuccess != -1;
     }
@@ -48,27 +49,38 @@ public class CheckResultDaolmpl extends CheckResultDao {
        "video char(100)"
      */
     @Override
-    public List<CheckResult> queryCheckResult(int Identifier) {
-        List<CheckResult> list = new ArrayList<>();
+    public ArrayList<CheckResult> queryCheckResult(int Identifier) {
+        ArrayList<CheckResult> list = new ArrayList<>();
         CheckResult result;
-        Cursor cursor = database.query("checkresult", null, "identifier = ", new String[]{String.valueOf(Identifier)}, null, null, "num");
+        Cursor cursor = database.query("checkresult", null, "identifier = ?", new String[]{String.valueOf(Identifier)}, null, null, "num ASC");
         while (cursor.moveToNext()) {
             result = new CheckResult();
+            result.setId(cursor.getInt(cursor.getColumnIndex("id")));
             result.setIdentifier(cursor.getInt(cursor.getColumnIndex("identifier")));
             result.setNum(cursor.getInt(cursor.getColumnIndex("num")));
             result.setComment(cursor.getString(cursor.getColumnIndex("comment")));
             result.setResult(cursor.getInt(cursor.getColumnIndex("checkresult")));
-            result.setImageUrls(cursor.getString(cursor.getColumnIndex("image")));
-            result.setAudioUrls(cursor.getString(cursor.getColumnIndex("audio")));
-            result.setVideoUrls(cursor.getString(cursor.getColumnIndex("video")));
+            result.setImageUrls(LocalTools.changeToList(cursor.getString(cursor.getColumnIndex("image"))));
+            result.setAudioUrls(LocalTools.changeToList(cursor.getString(cursor.getColumnIndex("audio"))));
+            result.setVideoUrls(LocalTools.changeToList(cursor.getString(cursor.getColumnIndex("video"))));
             list.add(result);
         }
+        LogUtil.logI("已经检查" + list.size() + "条");
         return list;
     }
 
     @Override
-    public void updateCheckResult(CheckResult result) {
-
+    public boolean updateCheckResult(CheckResult result) {
+        ContentValues values = new ContentValues();
+        values.put("identifier", result.getIdentifier());
+        values.put("num", result.getNum());
+        values.put("checkresult", result.getResult());
+        values.put("comment", result.getComment());
+        values.put("audio", LocalTools.changeToString(result.getAudioUrls()));
+        values.put("image", LocalTools.changeToString(result.getImageUrls()));
+        values.put("video", LocalTools.changeToString(result.getVideoUrls()));
+        long isSuccess = database.update("checkresult", values, "id = ?", new String[]{String.valueOf(result.getId())});
+        return isSuccess != -1;
     }
 
     @Override

@@ -32,7 +32,8 @@ public class CheckPlanDaolmpl extends CheckPlanDao {
         values.put("user", plan.getUser());
         values.put("type", plan.getType());
         values.put("tel", plan.getTel());
-        db.insert("checkplan", null, values);
+        long i =db.insert("checkplan", null, values);
+        LogUtil.logI("插入plan"+i);
     }
 
     @Override
@@ -44,7 +45,7 @@ public class CheckPlanDaolmpl extends CheckPlanDao {
         ContentValues values = new ContentValues();
         values.put("name", plan.getName());
         values.put("state", plan.getState());
-        int isSuccess = db.update("checkplan", values, "indentifier = ", new String[]{String.valueOf(plan.getIdentifier())});
+        int isSuccess = db.update("checkplan", values, "indentifier = ?", new String[]{String.valueOf(plan.getIdentifier())});
 
         return isSuccess != 0;
     }
@@ -52,7 +53,7 @@ public class CheckPlanDaolmpl extends CheckPlanDao {
     @Override
     public CheckPlan queryCheckPlan(int identifier) {
         CheckPlan plan = null;
-        Cursor cursor = db.query("checkplan", null, "identifier =", new String[]{String.valueOf(identifier)}, null, null, null);
+        Cursor cursor = db.query("checkplan", null, "identifier=?", new String[]{String.valueOf(identifier)}, null, null, null);
         while (cursor.moveToNext()) {
             plan = new CheckPlan();
             plan.setIdentifier(cursor.getInt(cursor.getColumnIndex("identifier")));
@@ -65,12 +66,14 @@ public class CheckPlanDaolmpl extends CheckPlanDao {
 
     public int queryCheckPlanState(int identifier) {
         CheckPlan plan = null;
-        Cursor cursor = db.query("checkplan", new String[]{"state"}, "identifier =", new String[]{String.valueOf(identifier)}, null, null, null);
-        while (cursor.moveToNext()) {
-            return cursor.getInt(cursor.getColumnIndex("state"));
-        }
+        int i = 0;
+        Cursor cursor = db.query("checkplan", new String[]{"state"}, "identifier=?", new String[]{String.valueOf(identifier)}, null, null, null);
         LogUtil.logI("查询检查计划：" + cursor.getColumnCount());
-        return -1;
+        while (cursor.moveToNext()) {
+            LogUtil.logI("查询计划状态");
+            i = cursor.getInt(cursor.getColumnIndex("state"));
+        }
+        return i;
     }
 
     @Override
@@ -81,9 +84,13 @@ public class CheckPlanDaolmpl extends CheckPlanDao {
         }
         ContentValues values = new ContentValues();
         values.put("state", plan.getState());
-        int isSuccess = db.update("checkplan", values, "indentifier = ", new String[]{String.valueOf(plan.getIdentifier())});
+        int isSuccess = db.update("checkplan", values, "identifier = ?", new String[]{String.valueOf(plan.getIdentifier())});
 
         return isSuccess != 0;
+    }
+
+    public void colseDateBase() {
+        db.close();
     }
 
 }

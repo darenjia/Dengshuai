@@ -14,7 +14,7 @@ import com.bokun.bkjcb.on_siteinspection.Utils.Constants;
 public class SQLiteOpenUtil extends SQLiteOpenHelper{
 
     public SQLiteOpenUtil(Context context) {
-        super(context, "User", null, 1);
+        super(context, "User.db", null, 1);
     }
 
     public SQLiteOpenUtil(Context context, String name, SQLiteDatabase.CursorFactory factory, int version, DatabaseErrorHandler errorHandler) {

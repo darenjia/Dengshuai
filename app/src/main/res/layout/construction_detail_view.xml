@@ -83,10 +83,10 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
-        <TextView
+      <!--  <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/table_construction_tel" />
+            android:text="@string/table_construction_tel" />-->
 
         <View style="@style/empty_view"></View>
 
@@ -111,12 +111,12 @@
 
         <View style="@style/empty_view"></View>
 
-        <TextView
+        <!--<TextView
             android:id="@+id/construction_area"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/table_construction_tel" />
+            android:text="@string/table_construction_tel" />-->
     </LinearLayout>
 
     <LinearLayout

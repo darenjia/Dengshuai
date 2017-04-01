@@ -29,6 +29,7 @@ import com.bokun.bkjcb.on_siteinspection.Http.HttpManager;
 import com.bokun.bkjcb.on_siteinspection.Http.HttpRequestVo;
 import com.bokun.bkjcb.on_siteinspection.Http.RequestListener;
 import com.bokun.bkjcb.on_siteinspection.R;
+import com.bokun.bkjcb.on_siteinspection.SQLite.DateUtil;
 import com.bokun.bkjcb.on_siteinspection.Utils.AppManager;
 import com.bokun.bkjcb.on_siteinspection.Utils.LogUtil;
 import com.bokun.bkjcb.on_siteinspection.View.ConstructionDetailView;
@@ -258,8 +259,9 @@ public class MainActivity extends BaseActivity
         for (int i = 0; i < 3; i++) {
             CheckPlan checkPlan = new CheckPlan();
             checkPlan.setIdentifier(21545150 + i);
-            checkPlan.setName("检查计划3" + i);
+            checkPlan.setName("检查计划" + i);
             checkPlan.setState(i);
+            DateUtil.insertCheckPlan(this, checkPlan);
             checkPlans.add(checkPlan);
         }
 
@@ -284,18 +286,18 @@ public class MainActivity extends BaseActivity
     private void createDailog(final CheckPlan checkPlan) {
         final AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
-        ConstructionDetailView constructionDetailView = new ConstructionDetailView(this,checkPlan);
+        ConstructionDetailView constructionDetailView = new ConstructionDetailView(this, checkPlan);
         View view = constructionDetailView.getConstructionDetailView(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (v.getId() == R.id.btn_scan) {
                     Bundle bundle = new Bundle();
-                    bundle.putSerializable("checkplan",checkPlan);
-                    SecurityCheckActivity.ComeToSecurityCheckActivity(MainActivity.this,bundle);
+                    bundle.putSerializable("checkplan", checkPlan);
+                    SecurityCheckActivity.ComeToSecurityCheckActivity(MainActivity.this, bundle);
                 } else {
                     Bundle bundle = new Bundle();
-                    bundle.putSerializable("checkplan",checkPlan);
-                    SecurityCheckActivity.ComeToSecurityCheckActivity(MainActivity.this,bundle);
+                    bundle.putSerializable("checkplan", checkPlan);
+                    SecurityCheckActivity.ComeToSecurityCheckActivity(MainActivity.this, bundle);
                 }
             }
         });

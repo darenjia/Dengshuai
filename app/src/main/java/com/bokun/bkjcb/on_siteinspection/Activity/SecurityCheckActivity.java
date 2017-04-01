@@ -19,7 +19,9 @@ import android.widget.TextView;
 import com.bigkoo.alertview.AlertView;
 import com.bigkoo.alertview.OnItemClickListener;
 import com.bokun.bkjcb.on_siteinspection.Domain.CheckPlan;
+import com.bokun.bkjcb.on_siteinspection.Domain.CheckResult;
 import com.bokun.bkjcb.on_siteinspection.Domain.SerializableHashMap;
+import com.bokun.bkjcb.on_siteinspection.Domain.SerializableList;
 import com.bokun.bkjcb.on_siteinspection.Fragment.CheckItemFragment;
 import com.bokun.bkjcb.on_siteinspection.Fragment.LastFragment;
 import com.bokun.bkjcb.on_siteinspection.R;
@@ -36,9 +38,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by BKJCB on 2017/3/20.
@@ -53,7 +53,7 @@ public class SecurityCheckActivity extends BaseActivity implements ViewPager.OnP
     private TextView page_num;
     private List<Fragment> fragments;
     private List<String> contents;
-    private List<Map<String, Object>> results;
+    private ArrayList<CheckResult> results;
     private CheckPlan plan;
     private boolean isChecked;
 
@@ -78,9 +78,9 @@ public class SecurityCheckActivity extends BaseActivity implements ViewPager.OnP
 
         /*
         * 判断改检查是否检查*/
-        isChecked = DateUtil.queryCheckPlanState(this, plan.getState()) != 0;
+        isChecked = DateUtil.queryCheckPlanState(this, plan.getIdentifier()) != 0;
 
-        results = DateUtil.readDate(this, plan.getIdentifier());
+        results = DateUtil.readData(this, plan.getIdentifier());
         fragments = new ArrayList<>();
         contents = getCheckItems();
         for (int i = 0; i < contents.size() + 1; i++) {
@@ -90,26 +90,22 @@ public class SecurityCheckActivity extends BaseActivity implements ViewPager.OnP
             if (i < contents.size()) {
                 fragment = new CheckItemFragment();
                 bundle.putString("content", contents.get(i));
+                bundle.putInt("id", i);
             } else {
                 LastFragment lastFragment = new LastFragment();
-                lastFragment.setListener(new View.OnClickListener() {
+                lastFragment.setClickListener(new LastFragment.OnClick() {
                     @Override
-                    public void onClick(View v) {
-                        LogUtil.logI("保存数据");
+                    public void onClick() {
+                        boolean is = saveData(2);
+                        LogUtil.logI("保存数据" + is);
                     }
                 });
                 fragment = lastFragment;
             }
-            hashMap = new SerializableHashMap();
-            Map<String, Object> result;
-            if (isChecked) {
-                result = results.get(i);
-            } else {
-                result = new HashMap<>();
-            }
-            hashMap.setMap((HashMap<String, Object>) result);
-            results.add(hashMap.getMap());
-            bundle.putSerializable("result", hashMap.getMap());
+            bundle.putInt("identifier", plan.getIdentifier());
+            SerializableList list = new SerializableList();
+            list.setList(results);
+            bundle.putSerializable("results", list);
             fragment.setArguments(bundle);
             fragments.add(fragment);
         }
@@ -163,6 +159,7 @@ public class SecurityCheckActivity extends BaseActivity implements ViewPager.OnP
 
     public static void ComeToSecurityCheckActivity(Activity activity, Bundle bundle) {
         Intent intent = new Intent(activity, SecurityCheckActivity.class);
+        intent.putExtras(bundle);
         activity.startActivity(intent);
     }
 
@@ -200,8 +197,8 @@ public class SecurityCheckActivity extends BaseActivity implements ViewPager.OnP
 
     @Override
     public void onPageSelected(int position) {
-        /*LogUtil.logI("position:" + position);
-        if (mMenu != null) {
+        LogUtil.logI("fragment position:" + position);
+        /*if (mMenu != null) {
             if (position != 14) {
                 mMenu.findItem(R.id.btn_submit).setVisible(false);
             }
@@ -286,6 +283,7 @@ public class SecurityCheckActivity extends BaseActivity implements ViewPager.OnP
                 .setPositiveButton("退出", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+                        saveData(1);
                         finish();
                     }
                 })
@@ -298,7 +296,9 @@ public class SecurityCheckActivity extends BaseActivity implements ViewPager.OnP
                 .show();
     }
 
-    private void initData(CheckPlan plan) {
-        results = DateUtil.readDate(this, plan.getIdentifier());
+    private boolean saveData(int state) {
+        plan.setState(state);
+        DateUtil.updateCheckPlanState(this, plan);
+        return DateUtil.saveData(this, results);
     }
 }

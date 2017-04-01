@@ -10,7 +10,12 @@ import java.util.List;
 
 public abstract class CheckResultDao {
     public abstract boolean insertCheckResult(CheckResult result);
+
     public abstract List<CheckResult> queryCheckResult(int Identifier);
-    public abstract void updateCheckResult(CheckResult result);
+
+//    public abstract boolean queryCheckResultbyId(int id);
+
+    public abstract boolean updateCheckResult(CheckResult result);
+
     public abstract void changeCheckResult(CheckResult result);
 }

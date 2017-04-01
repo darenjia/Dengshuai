@@ -37,9 +37,9 @@
                 style="@style/table_content"
                 android:text="@string/table_construction_address" />
 
-            <TextView
+           <!-- <TextView
                 style="@style/table_content"
-                android:text="@string/table_construction_tel" />
+                android:text="@string/table_construction_tel" />-->
 
             <TextView
                 style="@style/table_content"
@@ -79,10 +79,10 @@
                 style="@style/table_content"
                 android:text="工程信息" />
 
-            <TextView
+           <!-- <TextView
                 android:id="@+id/construction_tel"
                 style="@style/table_content"
-                android:text="工程信息" />
+                android:text="工程信息" />-->
 
             <TextView
                 android:id="@+id/construction_area"

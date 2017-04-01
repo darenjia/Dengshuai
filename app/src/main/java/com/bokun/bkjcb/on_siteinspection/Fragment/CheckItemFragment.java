@@ -7,12 +7,14 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.provider.Settings;
+import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
@@ -28,6 +30,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bokun.bkjcb.on_siteinspection.BuildConfig;
+import com.bokun.bkjcb.on_siteinspection.Domain.CheckResult;
+import com.bokun.bkjcb.on_siteinspection.Domain.SerializableList;
 import com.bokun.bkjcb.on_siteinspection.R;
 import com.bokun.bkjcb.on_siteinspection.Utils.LogUtil;
 import com.bokun.bkjcb.on_siteinspection.Utils.Utils;
@@ -39,7 +43,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
+import java.util.Locale;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -56,6 +60,9 @@ public class CheckItemFragment extends BaseFragment implements View.OnClickListe
     private int REQUESR_CODE_CROPPHOTO = 1;
     private int REQUESR_CODE_RECORD = 3;
     private int REQUESR_CODE_VIDEO = 4;
+    private int CAMERA_IMAGE = 0;
+    private int VIDEO_IMAGE = 1;
+    private int AUDIO_IMAGE = 2;
     private String vdoName;
     private String imagePath = "picture/";
     private String videoPath = "video/";
@@ -63,11 +70,15 @@ public class CheckItemFragment extends BaseFragment implements View.OnClickListe
     private Uri uri = null;
     private File video;
     private File audio;
-    private Map<String, Object> result;
+    private CheckResult result;
     private AlertDialog remarkDialiog;
-    private List<String> imagePaths;
-    private List<String> videoPaths;
-    private List<String> audioPaths;
+    private ArrayList<String> imagePaths;
+    private ArrayList<String> videoPaths;
+    private ArrayList<String> audioPaths;
+    private ArrayList<CheckResult> results;
+    private int identifier;
+    private String comment;
+    private int fragmentId;
 
     @Override
     public View initView() {
@@ -79,20 +90,82 @@ public class CheckItemFragment extends BaseFragment implements View.OnClickListe
 
     @Override
     public void initData() {
+        initViewData();
+        checkSDPremission();
+        initListener();
+    }
+
+    private void initViewData() {
         String content = getArguments().getString("content");
-        result = (Map<String, Object>) getArguments().get("result");
-        imagePaths = new ArrayList<>();
-        videoPaths = new ArrayList<>();
-        audioPaths = new ArrayList<>();
-        result.put("imagePaths", imagePaths);
-        result.put("videoPaths", videoPaths);
-        result.put("audioPaths", audioPaths);
+        fragmentId = getArguments().getInt("id");
+        identifier = getArguments().getInt("identifier");
+        results = ((SerializableList) getArguments().get("results")).getList();
+        if (results.size() < fragmentId) {
+            result = results.get(fragmentId);
+        } else {
+            result = new CheckResult();
+            result.setIdentifier(identifier);
+            results.add(fragmentId, result);
+        }
+
+        int flag = result.getResult();
+        if (flag != 2) {
+            if (flag == 0) {
+                viewHolder.mRdaioGroup.check(R.id.check_result_radio_1);
+            } else {
+                viewHolder.mRdaioGroup.check(R.id.check_result_radio_2);
+            }
+        } else {
+            viewHolder.mRdaioGroup.check(R.id.check_result_radio_3);
+        }
+        if (result.getComment() != null) {
+            comment = result.getComment();
+            viewHolder.comment_word.setText(comment);
+        }
+        if (result.getImageUrls() != null) {
+            initImages(result.getImageUrls(), CAMERA_IMAGE);
+        } else {
+            imagePaths = new ArrayList<>();
+            result.setImageUrls(imagePaths);
+        }
+        if (result.getVideoUrls() != null) {
+            initImages(result.getVideoUrls(), VIDEO_IMAGE);
+        } else {
+            videoPaths = new ArrayList<>();
+            result.setVideoUrls(videoPaths);
+        }
+        if (result.getAudioUrls() != null) {
+            initImages(result.getAudioUrls(), AUDIO_IMAGE);
+        } else {
+            audioPaths = new ArrayList<>();
+            result.setAudioUrls(audioPaths);
+        }
+        viewHolder.txt_content.setText(content);
+    }
+
+    private void initListener() {
         viewHolder.camera_view.setOnClickListener(this);
         viewHolder.video_view.setOnClickListener(this);
         viewHolder.audio_view.setOnClickListener(this);
         viewHolder.btn_remark.setOnClickListener(this);
         viewHolder.commtent_pic.setOnClickListener(this);
-        viewHolder.txt_content.setText(content);
+
+        viewHolder.mRdaioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                LogUtil.logI("id:" + checkedId);
+                int flag = 2;
+                if (checkedId == R.id.check_result_radio_1) {
+                    flag = 0;
+                } else if (checkedId == R.id.check_result_radio_2) {
+                    flag = 1;
+                }
+                result.setResult(flag);
+            }
+        });
+    }
+
+    private void checkSDPremission() {
         if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission_group.STORAGE) != PackageManager.PERMISSION_GRANTED) {
             path = Environment.getExternalStorageDirectory() + "/Bokun";
             File file = new File(path);
@@ -102,12 +175,12 @@ public class CheckItemFragment extends BaseFragment implements View.OnClickListe
         } else {
             creatSnackBar(R.string.mis_error_no_permission_sdcard);
         }
-        viewHolder.mRdaioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(RadioGroup group, int checkedId) {
-                LogUtil.logI("id:" + checkedId);
-            }
-        });
+    }
+
+    private void initImages(List<String> list, int type) {
+        for (int i = 0; i < list.size(); i++) {
+            setImage(list.get(i), type);
+        }
     }
 
     @Override
@@ -116,7 +189,7 @@ public class CheckItemFragment extends BaseFragment implements View.OnClickListe
         switch (v.getId()) {
             case R.id.check_content_btn_camera:
                 intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                String picName = imagePath + (new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()))
+                String picName = imagePath + getDateTime()
                         + ".jpg";
                 image = new File(path, picName);
                 creatFile(image);
@@ -124,7 +197,7 @@ public class CheckItemFragment extends BaseFragment implements View.OnClickListe
                 break;
             case R.id.check_content_btn_audio:
                 intent = new Intent(MediaStore.Audio.Media.RECORD_SOUND_ACTION);
-                String mp3Name = audioPath + (new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()))
+                String mp3Name = audioPath + getDateTime()
                         + ".amr";
                 audio = new File(path, mp3Name);
                 creatFile(audio);
@@ -134,7 +207,7 @@ public class CheckItemFragment extends BaseFragment implements View.OnClickListe
                 intent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
 
                 // 保存录像到指定的路径
-                vdoName = videoPath + (new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()))
+                vdoName = videoPath + getDateTime()
                         + ".mp4";
                 video = new File(path, vdoName);
                 creatFile(video);
@@ -145,12 +218,12 @@ public class CheckItemFragment extends BaseFragment implements View.OnClickListe
                 creatEditCommentDialog();
                 break;
             case R.id.check_content_pic:
-                creatImageDialog(viewHolder.commtent_pic,imagePaths,"imagePaths");
+                creatImageDialog(viewHolder.commtent_pic, imagePaths, "imagePaths");
                 break;
             case R.id.check_content_audio:
                 break;
             case R.id.check_content_video:
-                creatImageDialog(viewHolder.commtent_video,videoPaths,"videoPaths");
+                creatImageDialog(viewHolder.commtent_video, videoPaths, "videoPaths");
                 break;
         }
     }
@@ -158,6 +231,7 @@ public class CheckItemFragment extends BaseFragment implements View.OnClickListe
     public class ViewHolder {
 
         private TextView txt_content;
+
         private RadioGroup mRdaioGroup;
         private ImageView camera_view;
         private ImageView audio_view;
@@ -203,19 +277,13 @@ public class CheckItemFragment extends BaseFragment implements View.OnClickListe
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        ImageView mImageView = new ImageView(getContext());
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        params.setMargins(10, 10, 10, 10);
+
         if (resultCode == RESULT_OK) {
             if (requestCode == REQUESR_CODE_CROPPHOTO) {
 //                Bundle bundle = data.getExtras();
 //                LogUtil.logI("bitmap" + (bundle.get("data") == null));
 //                Bitmap bitmap = (Bitmap) bundle.get("data");
-                Bitmap bitmap = Utils.compressBitmap(image.getAbsolutePath(), 160, 160);
-                LogUtil.logI("size:" + bitmap.getByteCount());
-                mImageView.setImageBitmap(bitmap);
-                viewHolder.image_title.setVisibility(View.VISIBLE);
-                viewHolder.commtent_pic.addView(mImageView, params);
+                setImage(image.getAbsolutePath(), CAMERA_IMAGE);
                 imagePaths.add(image.getAbsolutePath());
             } else if (requestCode == REQUESR_CODE_TAKEPHOTO) {
                 LogUtil.logI("拍完进入剪裁");
@@ -238,13 +306,7 @@ public class CheckItemFragment extends BaseFragment implements View.OnClickListe
             } else if (requestCode == REQUESR_CODE_VIDEO) {
 //                Bitmap bitmap = (Bitmap) bundle.get("data");
 //                Bitmap bitmap = getCutBitmap(sdcardTempFile.getAbsolutePath());
-                Bitmap bitmap = Utils.getVideoThumbnail(video.getAbsolutePath());
-//                bitmap = Utils.compressBitmap(bitmap);
-                bitmap = ThumbnailUtils.extractThumbnail(bitmap, 160, 160);
-                mImageView.setImageBitmap(bitmap);
-                LogUtil.logI("size:" + bitmap.getByteCount());
-                viewHolder.video_title.setVisibility(View.VISIBLE);
-                viewHolder.commtent_video.addView(mImageView, params);
+                setImage(video.getAbsolutePath(), VIDEO_IMAGE);
                 videoPaths.add(video.getAbsolutePath());
             } else if (requestCode == REQUESR_CODE_RECORD) {
                 String filePath;
@@ -261,9 +323,7 @@ public class CheckItemFragment extends BaseFragment implements View.OnClickListe
                 }
                 Utils.copyFile(filePath, audio);
                 if (audio != null && audio.length() != 0) {
-                    mImageView.setImageResource(R.drawable.audio);
-                    viewHolder.audio_title.setVisibility(View.VISIBLE);
-                    viewHolder.commtent_audio.addView(mImageView, params);
+                    setImage(null, AUDIO_IMAGE);
                     audioPaths.add(audio.getAbsolutePath());
                 }
             }
@@ -326,6 +386,28 @@ public class CheckItemFragment extends BaseFragment implements View.OnClickListe
         }
     }
 
+    private void setImage(String path, int type) {
+        LinearLayout layout = null;
+        ImageView mImageView = new ImageView(getContext());
+        Bitmap bitmap = null;
+        if (type == CAMERA_IMAGE) {
+            layout = viewHolder.commtent_pic;
+            bitmap = Utils.compressBitmap(path, 160, 160);
+        } else if (type == VIDEO_IMAGE) {
+            layout = viewHolder.commtent_video;
+            bitmap = Utils.getVideoThumbnail(video.getAbsolutePath());
+//                bitmap = Utils.compressBitmap(bitmap);
+            bitmap = ThumbnailUtils.extractThumbnail(bitmap, 160, 160);
+        } else {
+            layout = viewHolder.commtent_audio;
+            BitmapFactory.decodeResource(getResources(), R.drawable.audio);
+        }
+        LogUtil.logI("size:" + bitmap.getByteCount());
+        mImageView.setImageBitmap(bitmap);
+//        viewHolder.image_title.setVisibility(View.VISIBLE);
+        layout.addView(mImageView, getLayoutParams());
+    }
+
     private void creatEditCommentDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         View view = View.inflate(getContext(), R.layout.remark_view, null);
@@ -338,7 +420,7 @@ public class CheckItemFragment extends BaseFragment implements View.OnClickListe
                 if (remarkDialiog != null) {
                     remarkDialiog.dismiss();
                 }
-                result.put("remark", value);
+                result.setComment(value);
                 viewHolder.comment_word.setText(value);
             }
         });
@@ -367,7 +449,12 @@ public class CheckItemFragment extends BaseFragment implements View.OnClickListe
                 }
             }
         });
-        View view = preview.getImagePreviewView((List<String>) result.get(type));
+        View view;
+        if (type.equals("imagePaths")) {
+            view = preview.getImagePreviewView(result.getImageUrls());
+        } else {
+            view = preview.getImagePreviewView(result.getAudioUrls());
+        }
         builder.setView(view);
         builder.setCancelable(true);
         remarkDialiog = builder.create();
@@ -396,6 +483,21 @@ public class CheckItemFragment extends BaseFragment implements View.OnClickListe
                 e.printStackTrace();
             }
         }
+    }
+
+    private String getDateTime() {
+        return new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.CHINESE).format(new Date());
+    }
+
+    @NonNull
+    private LinearLayout.LayoutParams getLayoutParams() {
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        params.setMargins(10, 10, 10, 10);
+        return params;
+    }
+
+    public void setFragmentId(int id) {
+        this.fragmentId = id;
     }
 
 }

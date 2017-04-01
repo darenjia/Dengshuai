@@ -6,7 +6,12 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.bokun.bkjcb.on_siteinspection.Domain.CheckResult;
+import com.bokun.bkjcb.on_siteinspection.Domain.SerializableList;
 import com.bokun.bkjcb.on_siteinspection.R;
+import com.bokun.bkjcb.on_siteinspection.Utils.LogUtil;
+
+import java.util.ArrayList;
 
 /**
  * Created by BKJCB on 2017/3/28.
@@ -15,23 +20,53 @@ import com.bokun.bkjcb.on_siteinspection.R;
 public class LastFragment extends BaseFragment {
 
     private Button button;
+    private CheckResult result;
+    private OnClick clickListener;
+    private ArrayList<CheckResult> results;
+    private int fragmentId = 15;
+    private int identifier;
+
+    public interface OnClick {
+        void onClick();
+    }
 
     @Override
     public View initView() {
+        results = ((SerializableList) getArguments().get("results")).getList();
+        identifier = getArguments().getInt("identifier");
+        if (results.size() < fragmentId) {
+            result = results.get(fragmentId);
+        } else {
+            result = new CheckResult();
+            result.setIdentifier(identifier);
+            results.add(fragmentId, result);
+        }
         View view = LayoutInflater.from(getContext()).inflate(R.layout.last_fragment_view, null);
-        EditText idea = (EditText) view.findViewById(R.id.lastFragment_idea);
+        final EditText idea = (EditText) view.findViewById(R.id.lastFragment_idea);
         TextView user = (TextView) view.findViewById(R.id.lastFragment_user);
         TextView date = (TextView) view.findViewById(R.id.lastFragment_date);
+        String str = result.getComment();
+        if (str != null) {
+            idea.setText(str);
+        }
         button = (Button) view.findViewById(R.id.btn_submit);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                result.setComment(idea.getText().toString());
+                LogUtil.logI("正在提交");
+                clickListener.onClick();
+            }
+        });
         return view;
     }
 
     @Override
     public void initData() {
-
     }
 
-    public void setListener(View.OnClickListener listener) {
-        button.setOnClickListener(listener);
+    public void setClickListener(OnClick clickListener) {
+        this.clickListener = clickListener;
     }
+
 }

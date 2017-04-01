@@ -30,16 +30,16 @@ public class ConstructionDetailView {
         TextView mViewAddress = (TextView) view.findViewById(R.id.construction_address);
         TextView mViewArea = (TextView) view.findViewById(R.id.construction_area);
         TextView mViewType = (TextView) view.findViewById(R.id.construction_type);
-        TextView mViewTel = (TextView) view.findViewById(R.id.construction_tel);
+//        TextView mViewTel = (TextView) view.findViewById(R.id.construction_tel);
         TextView mViewManager = (TextView) view.findViewById(R.id.construction_manager);
         TextView mViewUser = (TextView) view.findViewById(R.id.construction_user);
         Button mButtonScan = (Button) view.findViewById(R.id.btn_scan);
         Button mButtonCheck = (Button) view.findViewById(R.id.btn_check);
 
         mViewName.setText(checkPlan.getName());
-        mViewId.setText(checkPlan.getIdentifier());
+        mViewId.setText(checkPlan.getIdentifier()+"");
         mViewAddress.setText("");
-        mViewTel.setText("");
+//        mViewTel.setText("");
         mViewArea.setText("");
         mViewType.setText("");
         mViewManager.setText("");

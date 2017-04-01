@@ -45,10 +45,10 @@ public class Constants {
             "area varchar(20)," +
             "type varchar(20)," +
             "tel varchar(20)," +
-            "manger varchar(50)," +
+            "manager varchar(50)," +
             "user varchar(30)" +
             ")";
-    public final static String CREATE_CHECK_RESULT = "create table checkResult(" +
+    public final static String CREATE_CHECK_RESULT = "create table checkresult(" +
             "id Integer primary key," +
             "identifier int(10)," +
             "num int(10)," +

@@ -28,6 +28,7 @@
             android:background="@drawable/check_item_content_end_bg">
 
             <RadioButton
+                android:id="@+id/check_result_radio_1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="5dp"
@@ -36,6 +37,7 @@
 
 
             <RadioButton
+                android:id="@+id/check_result_radio_2"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="5dp"
@@ -43,6 +45,7 @@
                 android:text="@string/result_no" />
 
             <RadioButton
+                android:id="@+id/check_result_radio_3"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="5dp"
@@ -88,7 +91,7 @@
                     android:id="@+id/check_content_pic_title"
                     style="@style/base_layout"
                     android:text="@string/image_file"
-                    android:visibility="gone" />
+                    android:visibility="visible" />
 
                 <HorizontalScrollView
                     android:layout_width="match_parent"
@@ -108,7 +111,7 @@
                     android:id="@+id/check_content_vdo_title"
                     style="@style/base_layout"
                     android:text="@string/video_file"
-                    android:visibility="gone" />
+                    android:visibility="visible" />
 
                 <HorizontalScrollView
                     android:layout_width="match_parent"
@@ -127,7 +130,7 @@
                     android:id="@+id/check_content_ado_title"
                     style="@style/base_layout"
                     android:text="@string/audio_file"
-                    android:visibility="gone" />
+                    android:visibility="visible" />
 
                 <HorizontalScrollView
                     android:layout_width="match_parent"
