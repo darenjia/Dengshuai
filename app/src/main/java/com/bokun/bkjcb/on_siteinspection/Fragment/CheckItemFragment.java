@@ -100,7 +100,9 @@ public class CheckItemFragment extends BaseFragment implements View.OnClickListe
         fragmentId = getArguments().getInt("id");
         identifier = getArguments().getInt("identifier");
         results = ((SerializableList) getArguments().get("results")).getList();
-        if (results.size() < fragmentId) {
+        LogUtil.logI("size"+results.size());
+
+        if (results.size() > fragmentId) {
             result = results.get(fragmentId);
         } else {
             result = new CheckResult();
@@ -109,6 +111,7 @@ public class CheckItemFragment extends BaseFragment implements View.OnClickListe
         }
 
         int flag = result.getResult();
+        LogUtil.logI(flag+":flag"+result.getComment());
         if (flag != 2) {
             if (flag == 0) {
                 viewHolder.mRdaioGroup.check(R.id.check_result_radio_1);
@@ -402,7 +405,7 @@ public class CheckItemFragment extends BaseFragment implements View.OnClickListe
             layout = viewHolder.commtent_audio;
             BitmapFactory.decodeResource(getResources(), R.drawable.audio);
         }
-        LogUtil.logI("size:" + bitmap.getByteCount());
+//        LogUtil.logI("size:" + bitmap.getByteCount());
         mImageView.setImageBitmap(bitmap);
 //        viewHolder.image_title.setVisibility(View.VISIBLE);
         layout.addView(mImageView, getLayoutParams());
