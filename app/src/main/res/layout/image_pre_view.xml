@@ -10,7 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:textSize="18sp"/>
+        android:textSize="18sp" />
 
     <TextView
         android:layout_width="match_parent"
@@ -20,14 +20,23 @@
     <android.support.v4.view.ViewPager
         android:id="@+id/preview_viewpager"
         android:layout_width="match_parent"
-        android:layout_height="300dp"
-        />
+        android:layout_height="300dp" />
+
     <EditText
         android:id="@+id/preview_name"
         style="@style/table_content"
+        android:imeActionId="@+id/change_file_name"
+        android:imeActionLabel="@string/action_change_short"
+        android:imeOptions="actionUnspecified"
+        android:maxLength="20"
+        android:maxLines="1"
         android:text="210210.jpg"
-        android:enabled="false"
-        />
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/preview_file_name"
+        style="@style/table_content" />
+
     <TextView
         android:layout_width="match_parent"
         android:layout_height="2dp"
@@ -37,20 +46,22 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
+
         <Button
             android:id="@+id/preview_delete"
             style="@style/button_layout"
             android:background="@color/colorNone"
-            android:text="删除"/>
+            android:text="删除" />
 
         <TextView
             android:layout_width="2dp"
             android:layout_height="match_parent"
             android:background="#898383" />
+
         <Button
             android:id="@+id/preview_cancel"
             style="@style/button_layout"
             android:background="@color/colorNone"
-            android:text="取消"/>
+            android:text="取消" />
     </LinearLayout>
 </LinearLayout>

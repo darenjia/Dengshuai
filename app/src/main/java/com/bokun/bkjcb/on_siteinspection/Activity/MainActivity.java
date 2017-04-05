@@ -290,11 +290,7 @@ public class MainActivity extends BaseActivity
         View view = constructionDetailView.getConstructionDetailView(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (v.getId() == R.id.btn_scan) {
-                    Bundle bundle = new Bundle();
-                    bundle.putSerializable("checkplan", checkPlan);
-                    SecurityCheckActivity.ComeToSecurityCheckActivity(MainActivity.this, bundle);
-                } else {
+                if (v.getId() == R.id.btn_check) {
                     Bundle bundle = new Bundle();
                     bundle.putSerializable("checkplan", checkPlan);
                     SecurityCheckActivity.ComeToSecurityCheckActivity(MainActivity.this, bundle);

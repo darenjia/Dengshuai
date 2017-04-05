@@ -10,8 +10,10 @@ import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -38,6 +40,7 @@ public class ImagePreview implements View.OnClickListener {
     private EditText fileName;
     private List<String> files;
     private TextView textView;
+    private TextView pathName;
     private Button btnDelete;
     private Button btnCancel;
 
@@ -88,7 +91,7 @@ public class ImagePreview implements View.OnClickListener {
         };
         viewPager.setAdapter(adapter);
         textView.setText("1/" + list.size());
-        fileName.setText(getFileName(0));
+        pathName.setText(getFileName(0));
     }
 
     @NonNull
@@ -99,13 +102,14 @@ public class ImagePreview implements View.OnClickListener {
         btnDelete = (Button) view.findViewById(R.id.preview_delete);
         btnCancel = (Button) view.findViewById(R.id.preview_cancel);
         viewPager = (ViewPager) view.findViewById(R.id.preview_viewpager);
+        pathName = (TextView) view.findViewById(R.id.preview_file_name);
         return view;
     }
 
     private void initListener() {
         btnCancel.setOnClickListener(this);
         btnDelete.setOnClickListener(this);
-        fileName.setOnClickListener(this);
+        pathName.setOnClickListener(this);
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
@@ -138,15 +142,27 @@ public class ImagePreview implements View.OnClickListener {
             @Override
             public void afterTextChanged(Editable s) {
                 s.toString();
-                LogUtil.logI("newName:"+s.toString());
+                LogUtil.logI("newName:" + s.toString());
             }
         });
         fileName.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
-                if (v==fileName&&!hasFocus){
+                if (v == fileName && !hasFocus) {
                     LogUtil.logI("filename lose focus");
+                    fileName.setVisibility(View.GONE);
+                    pathName.setVisibility(View.INVISIBLE);
+                    pathName.setText(fileName.getText());
                 }
+            }
+        });
+        fileName.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
+                if (id == R.id.change_file_name || id == EditorInfo.IME_NULL) {
+                    return true;
+                }
+                return false;
             }
         });
     }
@@ -177,14 +193,14 @@ public class ImagePreview implements View.OnClickListener {
             if (list.size() == 0) {
                 listener.onCancel();
             }
-        } else if (v.getId() == R.id.preview_cancel){
+        } else if (v.getId() == R.id.preview_cancel) {
             listener.onCancel();
-        } else if (v.getId() == R.id.preview_name){
-            LogUtil.logI("click name!");
-            Toast.makeText(context,"click name!",Toast.LENGTH_SHORT).show();
-            fileName.setEnabled(true);
-        }else {
-            Toast.makeText(context,"click!",Toast.LENGTH_SHORT).show();
+        } else if (v.getId() == R.id.preview_file_name) {
+            fileName.setText(pathName.getText());
+            fileName.setVisibility(View.VISIBLE);
+            pathName.setVisibility(View.GONE);
+        } else {
+            Toast.makeText(context, "click!", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -196,8 +212,8 @@ public class ImagePreview implements View.OnClickListener {
         this.listener = listener;
     }
 
-    public String getFileName(int position){
+    public String getFileName(int position) {
         String path = files.get(position);
-        return path.substring(path.lastIndexOf("/")+1);
+        return path.substring(path.lastIndexOf("/") + 1);
     }
 }

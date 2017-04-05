@@ -3,7 +3,6 @@ package com.bokun.bkjcb.on_siteinspection.Utils;
 import android.content.Context;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -33,7 +32,7 @@ public class LocalTools {
     * */
     public static String changeToString(List<String> list) {
         StringBuilder builder = new StringBuilder();
-        if (list.size() != 0) {
+        if (list != null && list.size() != 0) {
             for (int i = 0; i < list.size(); i++) {
                 builder.append(list.get(i));
                 if (i != (list.size() - 1)) {
@@ -41,18 +40,17 @@ public class LocalTools {
                 }
             }
         } else {
-            return "";
+            return null;
         }
         return builder.toString();
     }
 
     public static ArrayList<String> changeToList(String string) {
         ArrayList<String> list = new ArrayList<>();
-        String[] strings = string.split(",");
-        if (strings.length == 0) {
+        if (string == null) {
             return null;
         }
-        list.addAll(Arrays.asList(strings));
+        String[] strings = string.split(",");
         return list;
     }
 }

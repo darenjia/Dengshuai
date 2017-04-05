@@ -9,7 +9,7 @@ import java.util.ArrayList;
 
 public class CheckResult implements Serializable {
 
-    private int id;  //主键id
+    private int id = -1;  //主键id
     private int identifier; //唯一标识符，用于确定属于哪个检查计划
     private int num;   //结果编号
     private String comment; //文字备注信息

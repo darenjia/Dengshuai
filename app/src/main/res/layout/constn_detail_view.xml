@@ -113,18 +113,6 @@
         android:orientation="horizontal">
 
         <Button
-            android:id="@+id/btn_scan"
-            style="@style/button_layout"
-            android:layout_gravity="center"
-            android:background="#F2F2F2"
-            android:text="@string/btn_scan" />
-
-        <TextView
-            android:layout_width="2dp"
-            android:layout_height="match_parent"
-            android:background="#898383" />
-
-        <Button
             android:id="@+id/btn_check"
             style="@style/button_layout"
             android:layout_gravity="end"

@@ -21,7 +21,7 @@ public class DateUtil {
         try {
             for (int i = 0; i < results.size(); i++) {
                 result = results.get(i);
-                if (result.getId() != 0) {
+                if (result.getId() != -1) {
                     daolmpl.updateCheckResult(result);
                 } else {
                     daolmpl.insertCheckResult(result);
@@ -80,7 +80,7 @@ public class DateUtil {
 
     public static boolean updateCheckPlanState(Context context, CheckPlan plan) {
         CheckPlanDaolmpl daolmpl = new CheckPlanDaolmpl(context);
-        LogUtil.logI("更新一条检查计划" + plan.getIdentifier() + " state:" + plan.getState());
+        LogUtil.logI("更新一条检查计划状态" + plan.getIdentifier() + " state:" + plan.getState());
         return daolmpl.updateCheckPlanState(plan);
     }
 }

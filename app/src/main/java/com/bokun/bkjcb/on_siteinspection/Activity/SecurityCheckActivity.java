@@ -8,20 +8,18 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bigkoo.alertview.AlertView;
 import com.bigkoo.alertview.OnItemClickListener;
+import com.bokun.bkjcb.on_siteinspection.Adapter.PagerAdapter;
 import com.bokun.bkjcb.on_siteinspection.Domain.CheckPlan;
 import com.bokun.bkjcb.on_siteinspection.Domain.CheckResult;
-import com.bokun.bkjcb.on_siteinspection.Domain.SerializableHashMap;
-import com.bokun.bkjcb.on_siteinspection.Domain.SerializableList;
 import com.bokun.bkjcb.on_siteinspection.Fragment.CheckItemFragment;
 import com.bokun.bkjcb.on_siteinspection.Fragment.LastFragment;
 import com.bokun.bkjcb.on_siteinspection.R;
@@ -51,11 +49,12 @@ public class SecurityCheckActivity extends BaseActivity implements ViewPager.OnP
     private ImageButton btn_forward;
     private ImageButton btn_next;
     private TextView page_num;
-    private List<Fragment> fragments;
+    private ArrayList<Fragment> fragments;
     private List<String> contents;
     private ArrayList<CheckResult> results;
     private CheckPlan plan;
     private boolean isChecked;
+    private PagerAdapter pagerAdapter;
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -79,14 +78,17 @@ public class SecurityCheckActivity extends BaseActivity implements ViewPager.OnP
         /*
         * 判断改检查是否检查*/
         isChecked = DateUtil.queryCheckPlanState(this, plan.getIdentifier()) != 0;
+//        viewPager.setCurrentItem(13);
+//        FragmentAdapter adapter = new FragmentAdapter(context, getCheckItems());
+//        viewPager.setAdapter(adapter);
+    }
 
-        results = DateUtil.readData(this, plan.getIdentifier());
+    private void initFragments() {
         fragments = new ArrayList<>();
         contents = getCheckItems();
         for (int i = 0; i < contents.size() + 1; i++) {
-            Fragment fragment = null;
+            Fragment fragment;
             Bundle bundle = new Bundle();
-            SerializableHashMap hashMap = null;
             if (i < contents.size()) {
                 fragment = new CheckItemFragment();
                 bundle.putString("content", contents.get(i));
@@ -97,25 +99,29 @@ public class SecurityCheckActivity extends BaseActivity implements ViewPager.OnP
                     @Override
                     public void onClick() {
                         boolean is = saveData(2);
-                        LogUtil.logI("保存数据" + is);
+                        Toast.makeText(SecurityCheckActivity.this, "正在保存" + is, Toast.LENGTH_SHORT).show();
+                        finish();
                     }
                 });
                 fragment = lastFragment;
             }
-            bundle.putInt("identifier", plan.getIdentifier());
-            SerializableList list = new SerializableList();
-            list.setList(results);
-            bundle.putSerializable("results", list);
+            CheckResult result;
+            if (isChecked && results.size() == 16) {
+                result = results.get(i);
+            } else {
+                result = new CheckResult();
+                result.setIdentifier(plan.getIdentifier());
+                result.setNum(i + 1);
+                results.add(result);
+            }
+            bundle.putSerializable("result", result);
             fragment.setArguments(bundle);
             fragments.add(fragment);
         }
-
-        LogUtil.logI("size:" + fragments.size());
-        PagerAdapter pagerAdapter = new PagerAdapter(getSupportFragmentManager());
+        pagerAdapter = new PagerAdapter(getSupportFragmentManager(), fragments);
         viewPager.setAdapter(pagerAdapter);
-//        viewPager.setCurrentItem(13);
-//        FragmentAdapter adapter = new FragmentAdapter(context, getCheckItems());
-//        viewPager.setAdapter(adapter);
+        page_num.setText(String.format("%d/%d", 1, contents.size() + 1));
+        page_num.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -134,6 +140,10 @@ public class SecurityCheckActivity extends BaseActivity implements ViewPager.OnP
 
     @Override
     protected void loadData() {
+        checkIsChecked();
+    }
+
+    private void checkIsChecked() {
         if (isChecked) {
             new AlertDialog.Builder(this)
                     .setTitle("提示")
@@ -141,20 +151,25 @@ public class SecurityCheckActivity extends BaseActivity implements ViewPager.OnP
                     .setPositiveButton("继续检查", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-
+                            results = DateUtil.readData(context, plan.getIdentifier());
+                            initFragments();
                         }
                     })
                     .setNegativeButton("重新检查", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-
+                            LogUtil.logI("重新检查，清空数据");
+                            results = new ArrayList<>();
+                            initFragments();
                         }
                     })
                     .create()
                     .show();
 
+        } else {
+            results = new ArrayList<>();
+            initFragments();
         }
-        page_num.setText(1 + "/" + fragments.size());
     }
 
     public static void ComeToSecurityCheckActivity(Activity activity, Bundle bundle) {
@@ -253,23 +268,6 @@ public class SecurityCheckActivity extends BaseActivity implements ViewPager.OnP
         }
     }
 
-    private class PagerAdapter extends FragmentPagerAdapter {
-
-        public PagerAdapter(FragmentManager fm) {
-            super(fm);
-        }
-
-        @Override
-        public Fragment getItem(int position) {
-            return fragments.get(position);
-        }
-
-        @Override
-        public int getCount() {
-            return fragments.size();
-        }
-    }
-
     @Override
     public void onBackPressed() {
         showDialog();
@@ -280,17 +278,23 @@ public class SecurityCheckActivity extends BaseActivity implements ViewPager.OnP
                 .setTitle("提示")
                 .setMessage("检查还未完成，是否退出？")
                 .setCancelable(true)
-                .setPositiveButton("退出", new DialogInterface.OnClickListener() {
+                .setNegativeButton("保存退出", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         saveData(1);
                         finish();
                     }
                 })
-                .setNegativeButton("继续", new DialogInterface.OnClickListener() {
+                .setPositiveButton("继续", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();
+                    }
+                })
+                .setNeutralButton("直接退出", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        finish();
                     }
                 })
                 .show();
@@ -301,4 +305,5 @@ public class SecurityCheckActivity extends BaseActivity implements ViewPager.OnP
         DateUtil.updateCheckPlanState(this, plan);
         return DateUtil.saveData(this, results);
     }
+
 }

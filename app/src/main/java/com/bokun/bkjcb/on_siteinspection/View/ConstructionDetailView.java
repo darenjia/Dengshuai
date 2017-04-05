@@ -33,11 +33,10 @@ public class ConstructionDetailView {
 //        TextView mViewTel = (TextView) view.findViewById(R.id.construction_tel);
         TextView mViewManager = (TextView) view.findViewById(R.id.construction_manager);
         TextView mViewUser = (TextView) view.findViewById(R.id.construction_user);
-        Button mButtonScan = (Button) view.findViewById(R.id.btn_scan);
         Button mButtonCheck = (Button) view.findViewById(R.id.btn_check);
 
         mViewName.setText(checkPlan.getName());
-        mViewId.setText(checkPlan.getIdentifier()+"");
+        mViewId.setText(checkPlan.getIdentifier() + "");
         mViewAddress.setText("");
 //        mViewTel.setText("");
         mViewArea.setText("");
@@ -45,11 +44,7 @@ public class ConstructionDetailView {
         mViewManager.setText("");
         mViewUser.setText("");
         mButtonCheck.setOnClickListener(listener);
-        mButtonScan.setOnClickListener(listener);
         return view;
     }
 
-    private void setText(String content,TextView view){
-        view.setText(content);
-    }
 }

@@ -12,7 +12,9 @@ import android.widget.Toast;
 
 import com.bokun.bkjcb.on_siteinspection.Utils.AppManager;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -22,6 +24,14 @@ public abstract class BaseActivity extends AppCompatActivity {
     private long firstTime = 0;
     private long lastTime = 0;
     private static final int PERMISSIONS_REQUEST = 0;
+    private boolean isFirst = true;
+    private String[] premissions = new String[]{
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.CAMERA,
+            Manifest.permission.RECORD_AUDIO
+    };
+    private List<String> hasPremissions;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,7 +43,9 @@ public abstract class BaseActivity extends AppCompatActivity {
         findView();
         loadData();
         setListener();
-        checkPermissions();
+        if (isFirst) {
+            checkPermissions();
+        }
 
 
     }
@@ -87,25 +99,20 @@ public abstract class BaseActivity extends AppCompatActivity {
 
     public void checkPermissions() {
         ActivityCompat.requestPermissions(this,
-                new String[]{
-                        Manifest.permission.READ_EXTERNAL_STORAGE,
-                        Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                        Manifest.permission.CAMERA,
-                        Manifest.permission.RECORD_AUDIO
-                },
+                premissions,
                 PERMISSIONS_REQUEST);
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        hasPremissions = new ArrayList<>();
         if (requestCode == PERMISSIONS_REQUEST) {
             for (int i = 0; i < grantResults.length; i++) {
                 if (grantResults[i] == PackageManager.PERMISSION_GRANTED) {
-
+                    hasPremissions.add(permissions[i]);
                 }
             }
         }
-
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 }
