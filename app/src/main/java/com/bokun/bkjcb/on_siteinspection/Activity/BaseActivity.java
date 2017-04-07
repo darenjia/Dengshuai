@@ -2,6 +2,7 @@ package com.bokun.bkjcb.on_siteinspection.Activity;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -11,6 +12,7 @@ import android.view.KeyEvent;
 import android.widget.Toast;
 
 import com.bokun.bkjcb.on_siteinspection.Utils.AppManager;
+import com.bokun.bkjcb.on_siteinspection.Utils.LogUtil;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -24,7 +26,6 @@ public abstract class BaseActivity extends AppCompatActivity {
     private long firstTime = 0;
     private long lastTime = 0;
     private static final int PERMISSIONS_REQUEST = 0;
-    private boolean isFirst = true;
     private String[] premissions = new String[]{
             Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
@@ -43,7 +44,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         findView();
         loadData();
         setListener();
-        if (isFirst) {
+        if (isFirst()) {
             checkPermissions();
         }
 
@@ -101,6 +102,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         ActivityCompat.requestPermissions(this,
                 premissions,
                 PERMISSIONS_REQUEST);
+        writeToSharedPreferences("isFirst", 0);
     }
 
     @Override
@@ -114,5 +116,19 @@ public abstract class BaseActivity extends AppCompatActivity {
             }
         }
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    }
+
+    public void writeToSharedPreferences(String key, int value) {
+        SharedPreferences preferences = getSharedPreferences("default", MODE_APPEND);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putInt(key, value);
+        editor.commit();
+    }
+
+    public boolean isFirst() {
+        SharedPreferences preferences = getSharedPreferences("default", MODE_PRIVATE);
+        int is = preferences.getInt("isFirst", 1);
+        LogUtil.logI("is :" +is);
+        return is == 1;
     }
 }

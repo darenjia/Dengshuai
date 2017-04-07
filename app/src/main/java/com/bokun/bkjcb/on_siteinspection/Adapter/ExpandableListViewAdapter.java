@@ -4,25 +4,26 @@ import android.content.Context;
 import android.database.DataSetObserver;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ExpandableListAdapter;
+import android.widget.BaseExpandableListAdapter;
 import android.widget.TextView;
 
 import com.bokun.bkjcb.on_siteinspection.Domain.CheckPlan;
 import com.bokun.bkjcb.on_siteinspection.R;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by BKJCB on 2017/3/20.
  */
 
-public class ExpandableListViewAdapter implements ExpandableListAdapter {
+public class ExpandableListViewAdapter extends BaseExpandableListAdapter {
 
     private Context context;
     private List<CheckPlan> plan_list;
-    private List<List<CheckPlan>> plan_info;
+    private List<ArrayList<CheckPlan>> plan_info;
 
-    public ExpandableListViewAdapter(Context context, List<CheckPlan> plan_list, List<List<CheckPlan>> plan_info) {
+    public ExpandableListViewAdapter(Context context, ArrayList<CheckPlan> plan_list, ArrayList<ArrayList<CheckPlan>> plan_info) {
         this.context = context;
         this.plan_list = plan_list;
         this.plan_info = plan_info;
@@ -75,16 +76,21 @@ public class ExpandableListViewAdapter implements ExpandableListAdapter {
 
     @Override
     public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
-        TextView txtview = (TextView) View.inflate(context, R.layout.expandable_group_item_view, null);
+        View view = View.inflate(context, R.layout.expandable_group_item_view, null);
+        TextView txtview = (TextView) view.findViewById(R.id.group_title);
         txtview.setText(plan_list.get(groupPosition).getName());
         return txtview;
     }
 
     @Override
     public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
-        TextView txtview = (TextView) View.inflate(context, R.layout.expandable_child_item_view, null);
-        txtview.setText(plan_info.get(groupPosition).get(childPosition).getName());
-        return txtview;
+        View view = View.inflate(context, R.layout.checkitemlist, null);
+        TextView title = (TextView) view.findViewById(R.id.check_item_title);
+        TextView state = (TextView) view.findViewById(R.id.check_item_state);
+        CheckPlan plan = plan_info.get(groupPosition).get(childPosition);
+        title.setText(plan.getName());
+        state.setText(getState(plan.getState()));
+        return view;
     }
 
     @Override
@@ -120,5 +126,17 @@ public class ExpandableListViewAdapter implements ExpandableListAdapter {
     @Override
     public long getCombinedGroupId(long groupId) {
         return groupId;
+    }
+
+    private String getState(int state) {
+        if (state == 0) {
+            return "（未开始检查）";
+        } else if (state == 1) {
+            return "（检查未完成）";
+        } else if (state == 2) {
+            return "（检查已完成）";
+        } else {
+            return "（数据已上传）";
+        }
     }
 }

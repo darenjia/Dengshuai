@@ -89,8 +89,8 @@ public class CheckItemFragment extends BaseFragment implements View.OnClickListe
 
     @Override
     public void initData() {
-        initViewData();
         checkSDPremission();
+        initViewData();
         initListener();
     }
 
@@ -153,6 +153,9 @@ public class CheckItemFragment extends BaseFragment implements View.OnClickListe
         viewHolder.audio_view.setOnClickListener(this);
         viewHolder.btn_remark.setOnClickListener(this);
         viewHolder.commtent_pic.setOnClickListener(this);
+        viewHolder.commtent_audio.setOnClickListener(this);
+        viewHolder.commtent_video.setOnClickListener(this);
+        viewHolder.comment_word.setOnClickListener(this);
 
         viewHolder.mRdaioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
@@ -230,12 +233,13 @@ public class CheckItemFragment extends BaseFragment implements View.OnClickListe
                 creatEditCommentDialog();
                 break;
             case R.id.check_content_pic:
-                creatImageDialog(viewHolder.commtent_pic, imagePaths, "imagePaths");
+                creatImageDialog(viewHolder.commtent_pic, imagePaths, "image");
                 break;
             case R.id.check_content_audio:
+                creatImageDialog(viewHolder.commtent_audio, audioPaths, "audio");
                 break;
             case R.id.check_content_video:
-                creatImageDialog(viewHolder.commtent_video, videoPaths, "videoPaths");
+                creatImageDialog(viewHolder.commtent_video, videoPaths, "video");
                 break;
         }
     }
@@ -400,28 +404,35 @@ public class CheckItemFragment extends BaseFragment implements View.OnClickListe
     }
 
     private void setImage(String path, int type) {
+        LogUtil.logI("加载图片，资源路径：" + path);
         LinearLayout layout = null;
         ImageView mImageView = new ImageView(getContext());
         Bitmap bitmap = null;
-        if (new File(path).exists() && new File(path).length() != 0) {
-            if (type == CAMERA_IMAGE) {
-                layout = viewHolder.commtent_pic;
-                bitmap = Utils.compressBitmap(path, 160, 160);
-                viewHolder.image_title.setText("图片文件（" + (++imageCount) + "/3）:");
-            } else if (type == VIDEO_IMAGE) {
-                layout = viewHolder.commtent_video;
-                bitmap = Utils.getVideoThumbnail(video.getAbsolutePath());
+        if (type == AUDIO_IMAGE) {
+            layout = viewHolder.commtent_audio;
+            bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.music);
+            viewHolder.audio_title.setText("音频文件（" + (++audioCount) + "/3）:");
+        } else {
+            File file = new File(path);
+            if (file.exists() && file.length() != 0) {
+                if (type == CAMERA_IMAGE) {
+                    layout = viewHolder.commtent_pic;
+                    bitmap = Utils.compressBitmap(path, getImageWidth(), getImageWidth());
+                    viewHolder.image_title.setText("图片文件（" + (++imageCount) + "/3）:");
+                } else if (type == VIDEO_IMAGE) {
+                    layout = viewHolder.commtent_video;
+                    bitmap = Utils.getVideoThumbnail(path);
+                    LogUtil.logI("video" + (bitmap == null));
 //                bitmap = Utils.compressBitmap(bitmap);
-                bitmap = ThumbnailUtils.extractThumbnail(bitmap, 160, 160);
-                viewHolder.video_title.setText("视频文件（" + (++videoCount) + "/3）:");
-            } else {
-                layout = viewHolder.commtent_audio;
-                BitmapFactory.decodeResource(getResources(), R.drawable.audio);
-                viewHolder.audio_title.setText("音频文件（" + (++audioCount) + "/3）:");
+                    bitmap = ThumbnailUtils.extractThumbnail(bitmap, getImageWidth(), getImageWidth());
+                    viewHolder.video_title.setText("视频文件（" + (++videoCount) + "/3）:");
+                } else {
+
+                }
             }
-//        LogUtil.logI("size:" + bitmap.getByteCount());
+        }
+        if (bitmap != null) {
             mImageView.setImageBitmap(bitmap);
-//        viewHolder.image_title.setVisibility(View.VISIBLE);
             layout.addView(mImageView, getLayoutParams());
         }
     }
@@ -449,7 +460,7 @@ public class CheckItemFragment extends BaseFragment implements View.OnClickListe
         remarkDialiog.setCanceledOnTouchOutside(false);
     }
 
-    private void creatImageDialog(final LinearLayout layout, final List<String> paths, String type) {
+    private void creatImageDialog(final LinearLayout layout, final List<String> paths, final String type) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         final ImagePreview preview = new ImagePreview(getContext());
         preview.setListener(new ImagePreview.ButtonClickListener() {
@@ -458,6 +469,13 @@ public class CheckItemFragment extends BaseFragment implements View.OnClickListe
             public void onDelete() {
                 layout.removeViewAt(preview.getPosition());
                 paths.remove(preview.getPosition());
+                if (type.equals("image")) {
+                    viewHolder.image_title.setText("图片文件（" + (--imageCount) + "/3）:");
+                } else if (type.equals("video")) {
+                    viewHolder.image_title.setText("视频文件（" + (--videoCount) + "/3）:");
+                } else {
+                    viewHolder.image_title.setText("音频文件（" + (--audioCount) + "/3）:");
+                }
             }
 
             @Override
@@ -468,10 +486,13 @@ public class CheckItemFragment extends BaseFragment implements View.OnClickListe
             }
         });
         View view;
-        if (type.equals("imagePaths")) {
+        if (type.equals("image")) {
             view = preview.getImagePreviewView(result.getImageUrls());
+        } else if (type.equals("video")) {
+            view = preview.getImagePreviewView(result.getVideoUrls());
         } else {
             view = preview.getImagePreviewView(result.getAudioUrls());
+
         }
         builder.setView(view);
         builder.setCancelable(true);
@@ -512,6 +533,12 @@ public class CheckItemFragment extends BaseFragment implements View.OnClickListe
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         params.setMargins(10, 10, 10, 10);
         return params;
+    }
+
+    private int getImageWidth() {
+        int width = Utils.getWindowWidthOrHeight(getContext(), "Width") / 3 - 80;
+        LogUtil.logI("width" + width);
+        return width;
     }
 
 }

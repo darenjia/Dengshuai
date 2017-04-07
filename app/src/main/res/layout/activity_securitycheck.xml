@@ -23,14 +23,17 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:visibility="gone">
 
-        <ImageButton
+        <ImageView
             android:id="@+id/btn_forward"
             android:layout_width="0dp"
-            android:layout_height="match_parent"
+            android:layout_height="24dp"
             android:layout_weight=".5"
+            android:scaleType="centerInside"
             android:background="@color/colorNone"
+            android:layerType="software"
             android:src="@drawable/arrow_left" />
 
         <TextView
@@ -40,13 +43,12 @@
             android:layout_weight="1"
             android:gravity="center"
             android:text="1/15"
-            android:textSize="18sp"
-            android:visibility="gone"/>
+            android:textSize="18sp" />
 
-        <ImageButton
+        <ImageView
             android:id="@+id/btn_next"
             android:layout_width="0dp"
-            android:layout_height="match_parent"
+            android:layout_height="24dp"
             android:layout_weight=".5"
             android:background="@color/colorNone"
             android:src="@drawable/arrow_right" />

@@ -65,22 +65,35 @@ public class DateUtil {
         return plan;
     }
 
+    public static ArrayList<CheckPlan> queryCheckPlan(Context context) {
+        CheckPlanDaolmpl daolmpl = new CheckPlanDaolmpl(context);
+        ArrayList<CheckPlan> plans = daolmpl.queryCheckPlan();
+        daolmpl.colseDateBase();
+        LogUtil.logI("查询所以检查计划" + plans.size());
+        return plans;
+    }
+
     public static int queryCheckPlanState(Context context, int indentifier) {
         CheckPlanDaolmpl daolmpl = new CheckPlanDaolmpl(context);
         int state = daolmpl.queryCheckPlanState(indentifier);
+        daolmpl.colseDateBase();
         LogUtil.logI("查询一条检查计划状态" + indentifier + " state:" + state);
         return state;
     }
 
     public static boolean updateCheckPlan(Context context, CheckPlan plan) {
         CheckPlanDaolmpl daolmpl = new CheckPlanDaolmpl(context);
+        boolean is = daolmpl.updateCheckPlan(plan);
+        daolmpl.colseDateBase();
         LogUtil.logI("更新一条检查计划" + plan.getIdentifier() + " state:" + plan.getState());
-        return daolmpl.updateCheckPlan(plan);
+        return is;
     }
 
     public static boolean updateCheckPlanState(Context context, CheckPlan plan) {
         CheckPlanDaolmpl daolmpl = new CheckPlanDaolmpl(context);
+        boolean is = daolmpl.updateCheckPlanState(plan);
+        daolmpl.colseDateBase();
         LogUtil.logI("更新一条检查计划状态" + plan.getIdentifier() + " state:" + plan.getState());
-        return daolmpl.updateCheckPlanState(plan);
+        return is;
     }
 }

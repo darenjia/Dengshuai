@@ -1,9 +1,11 @@
 package com.bokun.bkjcb.on_siteinspection.Activity;
 
-import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.RequiresApi;
@@ -11,7 +13,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
-import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -21,6 +23,7 @@ import com.bokun.bkjcb.on_siteinspection.Adapter.PagerAdapter;
 import com.bokun.bkjcb.on_siteinspection.Domain.CheckPlan;
 import com.bokun.bkjcb.on_siteinspection.Domain.CheckResult;
 import com.bokun.bkjcb.on_siteinspection.Fragment.CheckItemFragment;
+import com.bokun.bkjcb.on_siteinspection.Fragment.CheckPlanFragment;
 import com.bokun.bkjcb.on_siteinspection.Fragment.LastFragment;
 import com.bokun.bkjcb.on_siteinspection.R;
 import com.bokun.bkjcb.on_siteinspection.SQLite.DateUtil;
@@ -46,8 +49,8 @@ public class SecurityCheckActivity extends BaseActivity implements ViewPager.OnP
 
     private Toolbar toolbar;
     private ViewPager viewPager;
-    private ImageButton btn_forward;
-    private ImageButton btn_next;
+    private ImageView btn_forward;
+    private ImageView btn_next;
     private TextView page_num;
     private ArrayList<Fragment> fragments;
     private List<String> contents;
@@ -71,8 +74,8 @@ public class SecurityCheckActivity extends BaseActivity implements ViewPager.OnP
     @Override
     protected void findView() {
         viewPager = (ViewPager) findViewById(R.id.check_viewpager);
-        btn_forward = (ImageButton) findViewById(R.id.btn_forward);
-        btn_next = (ImageButton) findViewById(R.id.btn_next);
+        btn_forward = (ImageView) findViewById(R.id.btn_forward);
+        btn_next = (ImageView) findViewById(R.id.btn_next);
         page_num = (TextView) findViewById(R.id.txt_page);
 
         /*
@@ -84,44 +87,8 @@ public class SecurityCheckActivity extends BaseActivity implements ViewPager.OnP
     }
 
     private void initFragments() {
-        fragments = new ArrayList<>();
-        contents = getCheckItems();
-        for (int i = 0; i < contents.size() + 1; i++) {
-            Fragment fragment;
-            Bundle bundle = new Bundle();
-            if (i < contents.size()) {
-                fragment = new CheckItemFragment();
-                bundle.putString("content", contents.get(i));
-                bundle.putInt("id", i);
-            } else {
-                LastFragment lastFragment = new LastFragment();
-                lastFragment.setClickListener(new LastFragment.OnClick() {
-                    @Override
-                    public void onClick() {
-                        boolean is = saveData(2);
-                        Toast.makeText(SecurityCheckActivity.this, "正在保存" + is, Toast.LENGTH_SHORT).show();
-                        finish();
-                    }
-                });
-                fragment = lastFragment;
-            }
-            CheckResult result;
-            if (isChecked && results.size() == 16) {
-                result = results.get(i);
-            } else {
-                result = new CheckResult();
-                result.setIdentifier(plan.getIdentifier());
-                result.setNum(i + 1);
-                results.add(result);
-            }
-            bundle.putSerializable("result", result);
-            fragment.setArguments(bundle);
-            fragments.add(fragment);
-        }
-        pagerAdapter = new PagerAdapter(getSupportFragmentManager(), fragments);
-        viewPager.setAdapter(pagerAdapter);
-        page_num.setText(String.format("%d/%d", 1, contents.size() + 1));
-        page_num.setVisibility(View.VISIBLE);
+        LoadTask task = new LoadTask();
+        task.execute();
     }
 
     @Override
@@ -172,10 +139,10 @@ public class SecurityCheckActivity extends BaseActivity implements ViewPager.OnP
         }
     }
 
-    public static void ComeToSecurityCheckActivity(Activity activity, Bundle bundle) {
-        Intent intent = new Intent(activity, SecurityCheckActivity.class);
+    public static void ComeToSecurityCheckActivity(Context Context, Bundle bundle) {
+        Intent intent = new Intent(Context, SecurityCheckActivity.class);
         intent.putExtras(bundle);
-        activity.startActivity(intent);
+        Context.startActivity(intent);
     }
 
     public List<String> getCheckItems() {
@@ -282,6 +249,7 @@ public class SecurityCheckActivity extends BaseActivity implements ViewPager.OnP
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         saveData(1);
+                        setResultData(1);
                         finish();
                     }
                 })
@@ -300,10 +268,82 @@ public class SecurityCheckActivity extends BaseActivity implements ViewPager.OnP
                 .show();
     }
 
+    private void setResultData(int state) {
+        Intent old = getIntent();
+        Intent intent = new Intent();
+        Bundle bundle = new Bundle();
+        bundle.putInt("groupPosition", old.getExtras().getInt("groupPosition"));
+        bundle.putInt("childPosition", old.getExtras().getInt("childPosition"));
+        bundle.putInt("state", state);
+        intent.putExtras(bundle);
+        setResult(CheckPlanFragment.DATA_CHANGED, intent);
+    }
+
     private boolean saveData(int state) {
         plan.setState(state);
         DateUtil.updateCheckPlanState(this, plan);
         return DateUtil.saveData(this, results);
     }
 
+    private class LoadTask extends AsyncTask {
+        ProgressDialog dialog;
+
+        @Override
+        protected void onPreExecute() {
+            dialog = new ProgressDialog(SecurityCheckActivity.this);
+            dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+            dialog.show();
+            super.onPreExecute();
+        }
+
+        @Override
+        protected Object doInBackground(Object[] objects) {
+            fragments = new ArrayList<>();
+            contents = getCheckItems();
+            for (int i = 0; i < contents.size() + 1; i++) {
+                Fragment fragment;
+                Bundle bundle = new Bundle();
+                if (i < contents.size()) {
+                    fragment = new CheckItemFragment();
+                    bundle.putString("content", contents.get(i));
+                    bundle.putInt("id", i);
+                } else {
+                    LastFragment lastFragment = new LastFragment();
+                    lastFragment.setClickListener(new LastFragment.OnClick() {
+                        @Override
+                        public void onClick() {
+                            boolean is = saveData(2);
+                            Toast.makeText(SecurityCheckActivity.this, "正在保存" + is, Toast.LENGTH_SHORT).show();
+                            setResultData(2);
+                            finish();
+                        }
+                    });
+                    fragment = lastFragment;
+                }
+                CheckResult result;
+                if (isChecked && results.size() == 16) {
+                    result = results.get(i);
+                } else {
+                    result = new CheckResult();
+                    result.setIdentifier(plan.getIdentifier());
+                    result.setNum(i + 1);
+                    results.add(result);
+                }
+                bundle.putSerializable("result", result);
+                fragment.setArguments(bundle);
+                fragments.add(fragment);
+            }
+            pagerAdapter = new PagerAdapter(getSupportFragmentManager(), fragments);
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Object o) {
+            dialog.dismiss();
+            viewPager.setAdapter(pagerAdapter);
+            page_num.setText(String.format("%d/%d", 1, contents.size() + 1));
+            View parent = (View) page_num.getParent();
+            parent.setVisibility(View.VISIBLE);
+        }
+    }
 }

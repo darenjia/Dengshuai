@@ -8,6 +8,8 @@ import android.database.sqlite.SQLiteDatabase;
 import com.bokun.bkjcb.on_siteinspection.Domain.CheckPlan;
 import com.bokun.bkjcb.on_siteinspection.Utils.LogUtil;
 
+import java.util.ArrayList;
+
 /**
  * Created by BKJCB on 2017/3/31.
  */
@@ -32,8 +34,8 @@ public class CheckPlanDaolmpl extends CheckPlanDao {
         values.put("user", plan.getUser());
         values.put("type", plan.getType());
         values.put("tel", plan.getTel());
-        long i =db.insert("checkplan", null, values);
-        LogUtil.logI("插入plan"+i);
+        long i = db.insert("checkplan", null, values);
+        LogUtil.logI("插入plan" + i);
     }
 
     @Override
@@ -62,6 +64,22 @@ public class CheckPlanDaolmpl extends CheckPlanDao {
         }
         LogUtil.logI("查询检查计划：" + cursor.getColumnCount());
         return plan;
+    }
+
+    @Override
+    public ArrayList<CheckPlan> queryCheckPlan() {
+        ArrayList<CheckPlan> list = new ArrayList<>();
+        CheckPlan plan = null;
+        Cursor cursor = db.query("checkplan", null, null, null, null, null, null);
+        while (cursor.moveToNext()) {
+            plan = new CheckPlan();
+            plan.setIdentifier(cursor.getInt(cursor.getColumnIndex("identifier")));
+            plan.setName(cursor.getString(cursor.getColumnIndex("name")));
+            plan.setState(cursor.getInt(cursor.getColumnIndex("state")));
+            list.add(plan);
+        }
+        LogUtil.logI("查询检查计划：" + cursor.getColumnCount());
+        return list;
     }
 
     public int queryCheckPlanState(int identifier) {

@@ -3,6 +3,7 @@ package com.bokun.bkjcb.on_siteinspection.Utils;
 import android.content.Context;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -51,6 +52,7 @@ public class LocalTools {
             return null;
         }
         String[] strings = string.split(",");
+        list.addAll(Arrays.asList(strings));
         return list;
     }
 }

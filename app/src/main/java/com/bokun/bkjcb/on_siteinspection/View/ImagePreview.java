@@ -8,8 +8,6 @@ import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -88,6 +86,11 @@ public class ImagePreview implements View.OnClickListener {
             public void destroyItem(ViewGroup container, int position, Object object) {
                 container.removeView((View) object);
             }
+
+            @Override
+            public int getItemPosition(Object object) {
+                return POSITION_NONE;
+            }
         };
         viewPager.setAdapter(adapter);
         textView.setText("1/" + list.size());
@@ -128,23 +131,6 @@ public class ImagePreview implements View.OnClickListener {
             }
         });
         viewPager.setOnClickListener(this);
-        fileName.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                s.toString();
-                LogUtil.logI("newName:" + s.toString());
-            }
-        });
         fileName.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
@@ -160,6 +146,7 @@ public class ImagePreview implements View.OnClickListener {
             @Override
             public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
                 if (id == R.id.change_file_name || id == EditorInfo.IME_NULL) {
+                    changeFileName();
                     return true;
                 }
                 return false;
@@ -167,8 +154,13 @@ public class ImagePreview implements View.OnClickListener {
         });
     }
 
+    private void changeFileName() {
+        Toast.makeText(context, "file name change!", Toast.LENGTH_SHORT).show();
+        pathName.requestFocus();
+    }
+
     private void getBitmap(List<String> imagePath) {
-        Bitmap bitmap = null;
+        Bitmap bitmap;
         for (int i = 0; i < imagePath.size(); i++) {
             try {
                 bitmap = Utils.compressBitmap(imagePath.get(i));
@@ -186,19 +178,21 @@ public class ImagePreview implements View.OnClickListener {
     @Override
     public void onClick(View v) {
         if (v.getId() == R.id.preview_delete) {
-            LogUtil.logI("size" + list.size());
             list.remove(viewPager.getCurrentItem());
             adapter.notifyDataSetChanged();
+            LogUtil.logI("size" + list.size());
             listener.onDelete();
             if (list.size() == 0) {
                 listener.onCancel();
             }
+            textView.setText(String.format("%d/%d", viewPager.getCurrentItem()+1, list.size()));
         } else if (v.getId() == R.id.preview_cancel) {
             listener.onCancel();
         } else if (v.getId() == R.id.preview_file_name) {
             fileName.setText(pathName.getText());
             fileName.setVisibility(View.VISIBLE);
             pathName.setVisibility(View.GONE);
+            fileName.requestFocus();
         } else {
             Toast.makeText(context, "click!", Toast.LENGTH_SHORT).show();
         }

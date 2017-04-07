@@ -4,11 +4,13 @@
     android:layout_height="match_parent"
     android:id="@+id/swiperlayout">
 
-
     <ExpandableListView
         android:id="@+id/plan_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:divider="@color/colorAccent"
+        android:dividerHeight="1dp"
+        android:childDivider="@color/bgColor_divier"
         android:groupIndicator="@drawable/expandable_listview_indicator"/>
 
 </android.support.v4.widget.SwipeRefreshLayout>

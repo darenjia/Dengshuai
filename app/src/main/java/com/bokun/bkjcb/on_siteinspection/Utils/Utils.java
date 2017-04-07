@@ -225,5 +225,19 @@ public class Utils {
         return (realWidth - displayWidth) > 0 || (realHeight - displayHeight) > 0;
     }
 
+    public static int getWindowWidthOrHeight(Context context, String type) {
+        WindowManager windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        Display d = windowManager.getDefaultDisplay();
+
+        DisplayMetrics metrics = new DisplayMetrics();
+        d.getMetrics(metrics);
+        if (type.equals("Height")) {
+            return metrics.heightPixels;
+        } else {
+            return metrics.widthPixels;
+        }
+    }
+
+
 }
 

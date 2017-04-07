@@ -27,9 +27,10 @@
         style="@style/table_content"
         android:imeActionId="@+id/change_file_name"
         android:imeActionLabel="@string/action_change_short"
-        android:imeOptions="actionUnspecified"
+        android:imeOptions="actionDone"
         android:maxLength="20"
         android:maxLines="1"
+        android:inputType="text"
         android:text="210210.jpg"
         android:visibility="gone" />
 
