@@ -8,16 +8,26 @@ import java.util.ArrayList;
  */
 
 public class SerializableList implements Serializable {
-    private ArrayList<CheckResult> list;
+    private ArrayList<CheckResult> results;
+    private ArrayList<String> strings;
+
 
     public SerializableList() {
     }
 
     public ArrayList<CheckResult> getList() {
-        return list;
+        return results;
     }
 
     public void setList(ArrayList<CheckResult> list) {
-        this.list = list;
+        this.results = list;
+    }
+
+    public ArrayList<String> getStrings() {
+        return strings;
+    }
+
+    public void setStrings(ArrayList<String> strings) {
+        this.strings = strings;
     }
 }

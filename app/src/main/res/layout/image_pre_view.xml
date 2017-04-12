@@ -17,27 +17,25 @@
         android:layout_height="2dp"
         android:background="#898383" />
 
-    <android.support.v4.view.ViewPager
-        android:id="@+id/preview_viewpager"
-        android:layout_width="match_parent"
-        android:layout_height="300dp" />
-
     <EditText
         android:id="@+id/preview_name"
         style="@style/table_content"
         android:imeActionId="@+id/change_file_name"
         android:imeActionLabel="@string/action_change_short"
         android:imeOptions="actionDone"
+        android:inputType="text"
         android:maxLength="20"
         android:maxLines="1"
-        android:inputType="text"
         android:text="210210.jpg"
         android:visibility="gone" />
-
     <TextView
         android:id="@+id/preview_file_name"
         style="@style/table_content" />
 
+    <android.support.v4.view.ViewPager
+        android:id="@+id/preview_viewpager"
+        android:layout_width="match_parent"
+        android:layout_height="300dp" />
     <TextView
         android:layout_width="match_parent"
         android:layout_height="2dp"

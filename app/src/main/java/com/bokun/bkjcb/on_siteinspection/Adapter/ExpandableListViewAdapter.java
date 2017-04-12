@@ -79,7 +79,7 @@ public class ExpandableListViewAdapter extends BaseExpandableListAdapter {
         View view = View.inflate(context, R.layout.expandable_group_item_view, null);
         TextView txtview = (TextView) view.findViewById(R.id.group_title);
         txtview.setText(plan_list.get(groupPosition).getName());
-        return txtview;
+        return view;
     }
 
     @Override

@@ -1,9 +1,12 @@
 package com.bokun.bkjcb.on_siteinspection.View;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.ThumbnailUtils;
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.view.PagerAdapter;
@@ -55,9 +58,10 @@ public class ImagePreview implements View.OnClickListener {
     public View getImagePreviewView(List<String> imagePath) {
         this.list = new ArrayList<>();
         this.files = imagePath;
-        getBitmap(imagePath);
         View view = initView();
-        initViewDate();
+        LoadImageTask task = new LoadImageTask();
+        task.execute(imagePath);
+//        initViewDate();
         initListener();
         return view;
     }
@@ -75,10 +79,30 @@ public class ImagePreview implements View.OnClickListener {
             }
 
             @Override
-            public Object instantiateItem(ViewGroup container, int position) {
-                ImageView imageView = new ImageView(context);
+            public Object instantiateItem(ViewGroup container, final int position) {
+                final ImageView imageView = new ImageView(context);
                 imageView.setImageBitmap(list.get(position));
                 container.addView(imageView);
+                imageView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent intent = new Intent(Intent.ACTION_VIEW);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        String path = files.get(position);
+                        LogUtil.logI("图片路径" + path);
+                        Uri uri = Uri.parse("file://" + path);
+                        String type;
+                        if (path.endsWith(".jpg")) {
+                            type = "image/*";
+                        } else if (path.endsWith(".mp4")) {
+                            type = "video/*";
+                        } else {
+                            type = "audio/*";
+                        }
+                        intent.setDataAndType(uri, type);
+                        context.startActivity(intent);
+                    }
+                });
                 return imageView;
             }
 
@@ -122,7 +146,7 @@ public class ImagePreview implements View.OnClickListener {
             @Override
             public void onPageSelected(int position) {
                 textView.setText((position + 1) + "/" + list.size());
-                fileName.setText(getFileName(position));
+                pathName.setText(getFileName(position));
             }
 
             @Override
@@ -161,14 +185,18 @@ public class ImagePreview implements View.OnClickListener {
 
     private void getBitmap(List<String> imagePath) {
         Bitmap bitmap;
+        String path;
         for (int i = 0; i < imagePath.size(); i++) {
-            try {
+            path = imagePath.get(i);
+            if (path.endsWith(".jpg")) {
                 bitmap = Utils.compressBitmap(imagePath.get(i));
-            } catch (Exception e) {
+            } else if (path.endsWith(".mp4")) {
                 bitmap = ThumbnailUtils.createVideoThumbnail(imagePath.get(i), MediaStore.Images.Thumbnails.MICRO_KIND);
-                if (bitmap == null) {
-                    bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.image_error);
-                }
+            } else {
+                bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.vector_drawable_music);
+            }
+            if (bitmap == null) {
+                bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.image_error);
             }
             list.add(bitmap);
         }
@@ -185,7 +213,7 @@ public class ImagePreview implements View.OnClickListener {
             if (list.size() == 0) {
                 listener.onCancel();
             }
-            textView.setText(String.format("%d/%d", viewPager.getCurrentItem()+1, list.size()));
+            textView.setText(String.format("%d/%d", viewPager.getCurrentItem() + 1, list.size()));
         } else if (v.getId() == R.id.preview_cancel) {
             listener.onCancel();
         } else if (v.getId() == R.id.preview_file_name) {
@@ -209,5 +237,19 @@ public class ImagePreview implements View.OnClickListener {
     public String getFileName(int position) {
         String path = files.get(position);
         return path.substring(path.lastIndexOf("/") + 1);
+    }
+
+    class LoadImageTask extends AsyncTask {
+
+        @Override
+        protected Object doInBackground(Object[] objects) {
+            getBitmap((List<String>) objects[0]);
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Object o) {
+            initViewDate();
+        }
     }
 }

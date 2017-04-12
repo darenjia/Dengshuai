@@ -24,7 +24,7 @@ import java.util.Map;
  * 网络请求管理
  */
 
-public class HttpManager implements Runnable{
+public class OkHttpManager implements Runnable{
     private Context context;
     private RequestListener listener;
     private Thread currentRequest = null;
@@ -40,8 +40,8 @@ public class HttpManager implements Runnable{
      */
     private int requestStatus = 1;
 
-    public HttpManager(Context mContext, RequestListener mListener,
-                       HttpRequestVo vo, int mRequeststatus) {
+    public OkHttpManager(Context mContext, RequestListener mListener,
+                         HttpRequestVo vo, int mRequeststatus) {
 
         this.context = mContext;
         this.listener = mListener;
@@ -49,8 +49,8 @@ public class HttpManager implements Runnable{
         this.requestStatus = mRequeststatus;
     }
 
-    public HttpManager(Context mContext, RequestListener mListener,
-                       HttpRequestVo vo) {
+    public OkHttpManager(Context mContext, RequestListener mListener,
+                         HttpRequestVo vo) {
         this.context = mContext;
         this.listener = mListener;
         this.requestVo = vo;

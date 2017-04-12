@@ -98,8 +98,10 @@ public class CheckPlanFragment extends MainFragment implements RequestListener {
         constuctions.add(checkPlans);
         constuctions.add(checkPlans);
         constuctions.add(checkPlans);
+        LogUtil.logI("current:" + System.currentTimeMillis());
         adapter = new ExpandableListViewAdapter(context, checkPlans, constuctions);
         listview.setAdapter(adapter);
+        LogUtil.logI("currentTime:" + System.currentTimeMillis());
         listview.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
             @Override
             public boolean onGroupClick(ExpandableListView parent, View v, int groupPosition, long id) {
@@ -134,7 +136,7 @@ public class CheckPlanFragment extends MainFragment implements RequestListener {
                     bundle.putSerializable("checkplan", checkPlan);
                     bundle.putInt("groupPosition", groupPosition);
                     bundle.putInt("childPosition", childPosition);
-                    bundle.putInt("state",checkPlan.getState());
+                    bundle.putInt("state", checkPlan.getState());
 //                    SecurityCheckActivity.ComeToSecurityCheckActivity(context, bundle);
                     Intent intent = new Intent(context, SecurityCheckActivity.class);
                     intent.putExtras(bundle);

@@ -1,7 +1,6 @@
 package com.bokun.bkjcb.on_siteinspection.Activity;
 
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -58,6 +57,7 @@ public class SecurityCheckActivity extends BaseActivity implements ViewPager.OnP
     private CheckPlan plan;
     private boolean isChecked;
     private PagerAdapter pagerAdapter;
+    private AlertDialog dialog;
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -112,7 +112,7 @@ public class SecurityCheckActivity extends BaseActivity implements ViewPager.OnP
 
     private void checkIsChecked() {
         if (isChecked) {
-            new AlertDialog.Builder(this)
+            dialog = new AlertDialog.Builder(this)
                     .setTitle("提示")
                     .setMessage("检测到该项检查已经执行过，是否继续执行？")
                     .setPositiveButton("继续检查", new DialogInterface.OnClickListener() {
@@ -130,8 +130,9 @@ public class SecurityCheckActivity extends BaseActivity implements ViewPager.OnP
                             initFragments();
                         }
                     })
-                    .create()
-                    .show();
+                    .setCancelable(false)
+                    .create();
+            dialog.show();
 
         } else {
             results = new ArrayList<>();
@@ -286,18 +287,10 @@ public class SecurityCheckActivity extends BaseActivity implements ViewPager.OnP
     }
 
     private class LoadTask extends AsyncTask {
-        ProgressDialog dialog;
-
-        @Override
-        protected void onPreExecute() {
-            dialog = new ProgressDialog(SecurityCheckActivity.this);
-            dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-            dialog.show();
-            super.onPreExecute();
-        }
 
         @Override
         protected Object doInBackground(Object[] objects) {
+
             fragments = new ArrayList<>();
             contents = getCheckItems();
             for (int i = 0; i < contents.size() + 1; i++) {
@@ -339,7 +332,6 @@ public class SecurityCheckActivity extends BaseActivity implements ViewPager.OnP
 
         @Override
         protected void onPostExecute(Object o) {
-            dialog.dismiss();
             viewPager.setAdapter(pagerAdapter);
             page_num.setText(String.format("%d/%d", 1, contents.size() + 1));
             View parent = (View) page_num.getParent();

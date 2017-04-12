@@ -2,18 +2,23 @@ package com.bokun.bkjcb.on_siteinspection.Activity;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.Settings;
-import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
+import android.support.v7.widget.CardView;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -23,6 +28,7 @@ import com.bokun.bkjcb.on_siteinspection.Http.HttpRequestVo;
 import com.bokun.bkjcb.on_siteinspection.Http.JsonParser;
 import com.bokun.bkjcb.on_siteinspection.Http.RequestListener;
 import com.bokun.bkjcb.on_siteinspection.R;
+import com.bokun.bkjcb.on_siteinspection.Utils.LogUtil;
 
 /**
  * Created by BKJCB on 2017/3/17.
@@ -33,8 +39,8 @@ public class LoginActivity extends BaseActivity implements RequestListener {
     private EditText mPassword;
     private Button mLogin;
     private Button mChangeUser;
-    private CoordinatorLayout mContainer;
     private LinearLayout mLoginView;
+    private boolean isRemberPass;
 
     @SuppressLint("HandlerLeak")
     private Handler mHandler = new Handler() {
@@ -43,7 +49,7 @@ public class LoginActivity extends BaseActivity implements RequestListener {
             super.handleMessage(msg);
             switch (msg.what) {
                 case RequestListener.EVENT_NOT_NETWORD:
-                    Snackbar.make(mContainer, "", Snackbar.LENGTH_LONG).setAction("设置", new View.OnClickListener() {
+                    Snackbar.make(mCardView, "", Snackbar.LENGTH_LONG).setAction("设置", new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
                             Intent intent = new Intent(Settings.ACTION_WIRELESS_SETTINGS);
@@ -52,21 +58,26 @@ public class LoginActivity extends BaseActivity implements RequestListener {
                     }).show();
                     break;
                 case RequestListener.EVENT_CLOSE_SOCKET:
-                    Snackbar.make(mContainer, "网络错误！", Snackbar.LENGTH_LONG).show();
+                    Snackbar.make(mCardView, "网络错误！", Snackbar.LENGTH_LONG).show();
                     break;
                 case RequestListener.EVENT_NETWORD_EEEOR:
-                    Snackbar.make(mContainer, "请确认网络是否可用！", Snackbar.LENGTH_LONG).show();
+                    Snackbar.make(mCardView, "请确认网络是否可用！", Snackbar.LENGTH_LONG).show();
                     break;
                 case RequestListener.EVENT_GET_DATA_EEEOR:
-                    Snackbar.make(mContainer, "服务器错误，请稍后再试！", Snackbar.LENGTH_LONG).show();
+                    Snackbar.make(mCardView, "服务器错误，请稍后再试！", Snackbar.LENGTH_LONG).show();
                     break;
                 case RequestListener.EVENT_GET_DATA_SUCCESS:
                     break;
 
             }
+            MainActivity.ComeToMainActivity(LoginActivity.this);
+            LogUtil.logI("登录！" + msg.what);
+            noLogining();
         }
     };
     private HttpManager httpManager;
+    private CheckBox mRembPass;
+    private CardView mCardView;
 
     @Override
     protected void initView() {
@@ -79,8 +90,9 @@ public class LoginActivity extends BaseActivity implements RequestListener {
         mLogin = (Button) findViewById(R.id.login_button);
         mPassword = (EditText) findViewById(R.id.input_password);
         mUserName = (EditText) findViewById(R.id.input_username);
-        mContainer = (CoordinatorLayout) findViewById(R.id.snackbar_container);
         mLoginView = (LinearLayout) findViewById(R.id.logining_view);
+        mRembPass = (CheckBox) findViewById(R.id.login_pass_remb);
+        mCardView = (CardView) findViewById(R.id.login_cardview);
     }
 
     @Override
@@ -98,8 +110,8 @@ public class LoginActivity extends BaseActivity implements RequestListener {
         mLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                MainActivity.ComeToMainActivity(LoginActivity.this);
-//                attemptLogin();
+//                MainActivity.ComeToMainActivity(LoginActivity.this);
+                attemptLogin();
             }
         });
         mChangeUser.setOnClickListener(new View.OnClickListener() {
@@ -110,11 +122,25 @@ public class LoginActivity extends BaseActivity implements RequestListener {
                 }
                 mUserName.setText("");
                 mPassword.setText("");
-                mLoginView.setVisibility(View.GONE);
-                mLogin.setVisibility(View.VISIBLE);
+                noLogining();
                 mUserName.requestFocus();
             }
         });
+        mRembPass.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    isRemberPass = true;
+                } else {
+                    isRemberPass = false;
+                }
+            }
+        });
+    }
+
+    private void noLogining() {
+        mLoginView.setVisibility(View.GONE);
+        mCardView.setVisibility(View.VISIBLE);
     }
 
     /*
@@ -130,6 +156,8 @@ public class LoginActivity extends BaseActivity implements RequestListener {
     }
 
     private void attemptLogin() {
+        InputMethodManager imm = (InputMethodManager) this.getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(mLogin.getWindowToken(), 0);
         // Reset errors.
         mUserName.setError(null);
         mPassword.setError(null);
@@ -166,19 +194,27 @@ public class LoginActivity extends BaseActivity implements RequestListener {
         } else {
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
-            MainActivity.ComeToMainActivity(this);
+//
 
-            HttpRequestVo request = new HttpRequestVo("", "", new JsonParser());
+            HttpRequestVo request = new HttpRequestVo("", "http://www.baidu.com", new JsonParser());
             httpManager = new HttpManager(this, this, request, 2);
             httpManager.postRequest();
             mLoginView.setVisibility(View.VISIBLE);
-            mLogin.setVisibility(View.GONE);
+            mCardView.setVisibility(View.GONE);
         }
     }
 
     @Override
     protected void loadData() {
-
+        String flag = getFormPrefer("isRemberPass");
+        isRemberPass = flag.equals("true");
+        if (isRemberPass) {
+            String username = getFormPrefer("UserName");
+            String password = getFormPrefer("PassWord");
+            mUserName.setText(username);
+            mPassword.setText(password);
+            mRembPass.setChecked(true);
+        }
     }
 
     @Override
@@ -195,9 +231,8 @@ public class LoginActivity extends BaseActivity implements RequestListener {
     public void onBackPressed() {
         if (httpManager != null && httpManager.isRunning()) {
             httpManager.cancelHttpRequest();
-            Snackbar.make(mContainer, "登录已取消！", Snackbar.LENGTH_LONG).show();
-            mLoginView.setVisibility(View.GONE);
-            mLogin.setVisibility(View.VISIBLE);
+            Snackbar.make(mCardView, "登录已取消！", Snackbar.LENGTH_LONG).show();
+            noLogining();
         } else {
             super.onBackPressed();
         }
@@ -207,5 +242,32 @@ public class LoginActivity extends BaseActivity implements RequestListener {
     public static void comeToLoginActivity(Activity activity) {
         Intent intent = new Intent(activity, LoginActivity.class);
         activity.startActivity(intent);
+    }
+
+    private String getFormPrefer(String key) {
+        SharedPreferences preferences = getSharedPreferences("default", MODE_PRIVATE);
+        return preferences.getString(key, "");
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        boolean flag = mRembPass.isChecked();
+        if (flag) {
+            String username = mUserName.getText().toString();
+            String password = mPassword.getText().toString();
+            if (!TextUtils.isEmpty(username) && !TextUtils.isEmpty(password)) {
+                writeToSharedPreferences("UserName", username);
+                writeToSharedPreferences("PassWord", password);
+                writeToSharedPreferences("isRemberPass", "true");
+            }
+        }
+    }
+
+    public void writeToSharedPreferences(String key, String value) {
+        SharedPreferences preferences = getSharedPreferences("default", MODE_APPEND);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putString(key, value);
+        editor.commit();
     }
 }

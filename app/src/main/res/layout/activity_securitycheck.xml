@@ -31,10 +31,10 @@
             android:layout_width="0dp"
             android:layout_height="24dp"
             android:layout_weight=".5"
-            android:scaleType="centerInside"
             android:background="@color/colorNone"
             android:layerType="software"
-            android:src="@drawable/arrow_left" />
+            android:scaleType="centerInside"
+            android:src="@drawable/vector_drawable_arrow_left" />
 
         <TextView
             android:id="@+id/txt_page"
@@ -51,7 +51,7 @@
             android:layout_height="24dp"
             android:layout_weight=".5"
             android:background="@color/colorNone"
-            android:src="@drawable/arrow_right" />
+            android:src="@drawable/vector_drawable_arrow_right" />
     </LinearLayout>
 
     <android.support.v4.view.ViewPager

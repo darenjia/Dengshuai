@@ -22,7 +22,6 @@ import com.bokun.bkjcb.on_siteinspection.Fragment.CheckPlanFragment;
 import com.bokun.bkjcb.on_siteinspection.Fragment.TestFragment;
 import com.bokun.bkjcb.on_siteinspection.R;
 import com.bokun.bkjcb.on_siteinspection.Utils.AppManager;
-import com.bokun.bkjcb.on_siteinspection.Utils.LogUtil;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -130,9 +129,9 @@ public class MainActivity extends BaseActivity
             loadView("工程信息查询", "second");
         } else if (id == R.id.nav_map) {
             loadView("地图", "third");
-        } else if (id == R.id.nav_details) {
+        } /*else if (id == R.id.nav_details) {
             loadView("工程信息详情", "forth");
-        } else if (id == R.id.nav_update_result) {
+        } */else if (id == R.id.nav_update_result) {
             loadView("上传进度", "fifth");
         } else if (id == R.id.nav_update_result) {
             LoginActivity.comeToLoginActivity(this);
@@ -150,7 +149,6 @@ public class MainActivity extends BaseActivity
         Fragment currentFragment = viewMap.get(key);
         hideAllFragment();
         FragmentTransaction transaction = manager.beginTransaction();
-        LogUtil.logI("transaction" + transaction.isEmpty());
         if (currentFragment == null) {
             if (key.equals("first")){
                 currentFragment = new CheckPlanFragment();

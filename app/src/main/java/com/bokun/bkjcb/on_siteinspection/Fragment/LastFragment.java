@@ -1,5 +1,7 @@
 package com.bokun.bkjcb.on_siteinspection.Fragment;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -11,7 +13,6 @@ import com.bokun.bkjcb.on_siteinspection.R;
 import com.bokun.bkjcb.on_siteinspection.Utils.LogUtil;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Locale;
 
 /**
@@ -23,9 +24,7 @@ public class LastFragment extends BaseFragment {
     private Button button;
     private CheckResult result;
     private OnClick clickListener;
-    private ArrayList<CheckResult> results;
-    private int fragmentId = 15;
-    private int identifier;
+    private TextView user;
 
     public interface OnClick {
         void onClick();
@@ -33,19 +32,10 @@ public class LastFragment extends BaseFragment {
 
     @Override
     public View initView() {
-//        results = ((SerializableList) getArguments().get("results")).getList();
-        identifier = getArguments().getInt("identifier");
         result = (CheckResult) getArguments().getSerializable("result");
-//        if (results.size() > fragmentId) {
-//            result = results.get(fragmentId);
-//        } else {
-//            result = new CheckResult();
-//            result.setIdentifier(identifier);
-//            results.add(fragmentId, result);
-//        }
         View view = LayoutInflater.from(getContext()).inflate(R.layout.last_fragment_view, null);
         final EditText idea = (EditText) view.findViewById(R.id.lastFragment_idea);
-        TextView user = (TextView) view.findViewById(R.id.lastFragment_user);
+        user = (TextView) view.findViewById(R.id.lastFragment_user);
         TextView date = (TextView) view.findViewById(R.id.lastFragment_date);
         String str_date = new SimpleDateFormat("yyyy-MM-dd", Locale.CHINESE).format(System.currentTimeMillis());
         date.setText(str_date);
@@ -67,6 +57,10 @@ public class LastFragment extends BaseFragment {
 
     @Override
     public void initData() {
+        SharedPreferences preferences = getContext().getSharedPreferences("default", Context.MODE_PRIVATE);
+        String username = preferences.getString("UserName", "");
+        user.setText(username);
+
     }
 
     public void setClickListener(OnClick clickListener) {

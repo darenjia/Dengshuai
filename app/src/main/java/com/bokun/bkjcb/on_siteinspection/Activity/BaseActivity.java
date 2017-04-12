@@ -131,4 +131,5 @@ public abstract class BaseActivity extends AppCompatActivity {
         LogUtil.logI("is :" +is);
         return is == 1;
     }
+
 }
