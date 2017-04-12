@@ -8,6 +8,7 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Build;
@@ -20,7 +21,6 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -398,38 +398,46 @@ public class CheckItemFragment extends BaseFragment implements View.OnClickListe
     private void setImage(String path, int type) {
         LogUtil.logI("加载图片，资源路径：" + path);
         LinearLayout layout = null;
-        ImageView mImageView = new ImageView(getContext());
+        LinearLayout.LayoutParams params = getLayoutParams();
+        ImageView mImageView = null;
         Bitmap bitmap = null;
         if (type == AUDIO_IMAGE) {
             layout = viewHolder.commtent_audio;
-            mImageView.setImageResource(R.drawable.vector_drawable_music);
-//            bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.vector_drawable_music);
+            mImageView = LocalTools.setImageView(getContext(), params, null, null);
             viewHolder.audio_title.setText("音频文件（" + (++audioCount) + "/3）:");
         } else {
             File file = new File(path);
             LogUtil.logI("video" + file.length());
             if (type == CAMERA_IMAGE) {
                 layout = viewHolder.commtent_pic;
-                if (file.exists() && file.length() != 0) {
+                if (isFileOk(file)) {
                     bitmap = Utils.compressBitmap(path, getImageWidth(), getImageWidth());
+                } else {
+                    bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.image_error);
                 }
+                mImageView = LocalTools.setImageView(getContext(), params, null, bitmap);
                 viewHolder.image_title.setText("图片文件（" + (++imageCount) + "/3）:");
             } else if (type == VIDEO_IMAGE) {
                 layout = viewHolder.commtent_video;
-                if (file.exists() && file.length() != 0) {
+                if (isFileOk(file)) {
                     bitmap = Utils.getVideoThumbnail(path);
                     LogUtil.logI("video" + (bitmap == null));
 //                bitmap = Utils.compressBitmap(bitmap);
                     bitmap = ThumbnailUtils.extractThumbnail(bitmap, getImageWidth(), getImageWidth());
+                } else {
+                    bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.image_error);
                 }
+                mImageView = LocalTools.setImageView(getContext(), params, new BitmapDrawable(bitmap), bitmap);
                 viewHolder.video_title.setText("视频文件（" + (++videoCount) + "/3）:");
             }
             if (bitmap == null) {
-                bitmap = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.image_error);
             }
-            mImageView.setImageBitmap(bitmap);
         }
-        layout.addView(mImageView, getLayoutParams());
+        layout.addView(mImageView);
+    }
+
+    private boolean isFileOk(File file) {
+        return file.exists() && file.length() != 0;
     }
 
     private void creatEditCommentDialog() {
@@ -457,7 +465,7 @@ public class CheckItemFragment extends BaseFragment implements View.OnClickListe
 
     private void creatImageDialog(final LinearLayout layout, final List<String> paths, final String type) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        final ImagePreview preview = new ImagePreview(getContext());
+        final ImagePreview preview = new ImagePreview(getContext(), type);
         preview.setListener(new ImagePreview.ButtonClickListener() {
 
             @Override
@@ -525,7 +533,7 @@ public class CheckItemFragment extends BaseFragment implements View.OnClickListe
 
     @NonNull
     private LinearLayout.LayoutParams getLayoutParams() {
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(getImageWidth(), getImageWidth());
         params.setMargins(10, 10, 10, 10);
         return params;
     }
@@ -535,4 +543,5 @@ public class CheckItemFragment extends BaseFragment implements View.OnClickListe
         LogUtil.logI("width" + width);
         return width;
     }
+
 }

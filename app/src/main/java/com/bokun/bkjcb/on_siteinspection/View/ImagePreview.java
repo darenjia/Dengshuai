@@ -4,11 +4,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.v4.content.FileProvider;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.KeyEvent;
@@ -18,13 +21,16 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bokun.bkjcb.on_siteinspection.R;
+import com.bokun.bkjcb.on_siteinspection.Utils.LocalTools;
 import com.bokun.bkjcb.on_siteinspection.Utils.LogUtil;
 import com.bokun.bkjcb.on_siteinspection.Utils.Utils;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,6 +50,8 @@ public class ImagePreview implements View.OnClickListener {
     private TextView pathName;
     private Button btnDelete;
     private Button btnCancel;
+    private String type;
+    private LinearLayout.LayoutParams params;
 
     public interface ButtonClickListener {
         void onDelete();
@@ -51,14 +59,17 @@ public class ImagePreview implements View.OnClickListener {
         void onCancel();
     }
 
-    public ImagePreview(Context context) {
+    public ImagePreview(Context context,String type) {
         this.context = context;
+        this.type =type;
     }
 
     public View getImagePreviewView(List<String> imagePath) {
         this.list = new ArrayList<>();
         this.files = imagePath;
         View view = initView();
+        params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        params.setMargins(0,0,0,20);
         LoadImageTask task = new LoadImageTask();
         task.execute(imagePath);
 //        initViewDate();
@@ -80,8 +91,14 @@ public class ImagePreview implements View.OnClickListener {
 
             @Override
             public Object instantiateItem(ViewGroup container, final int position) {
-                final ImageView imageView = new ImageView(context);
-                imageView.setImageBitmap(list.get(position));
+                ImageView imageView ;
+                if (type.equals("image")) {
+                    imageView = LocalTools.setImageView(context,params,null,list.get(position));
+                } else if (type.equals("video")) {
+                    imageView = LocalTools.setImageView(context,params,new BitmapDrawable(list.get(position)),list.get(position));
+                } else {
+                    imageView = LocalTools.setImageView(context,params,null,null);
+                }
                 container.addView(imageView);
                 imageView.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -89,9 +106,16 @@ public class ImagePreview implements View.OnClickListener {
                         Intent intent = new Intent(Intent.ACTION_VIEW);
                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         String path = files.get(position);
+                        File file = new File(path);
                         LogUtil.logI("图片路径" + path);
-                        Uri uri = Uri.parse("file://" + path);
+                        Uri uri;
                         String type;
+                        if (Build.VERSION.SDK_INT >= 24) {
+                            uri = FileProvider.getUriForFile(context, "com.bokun.bkjcb.on_siteinspection.fileProvider", file);
+                            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                        } else {
+                            uri = Uri.parse("file://" + path);
+                        }
                         if (path.endsWith(".jpg")) {
                             type = "image/*";
                         } else if (path.endsWith(".mp4")) {
@@ -191,7 +215,7 @@ public class ImagePreview implements View.OnClickListener {
             if (path.endsWith(".jpg")) {
                 bitmap = Utils.compressBitmap(imagePath.get(i));
             } else if (path.endsWith(".mp4")) {
-                bitmap = ThumbnailUtils.createVideoThumbnail(imagePath.get(i), MediaStore.Images.Thumbnails.MICRO_KIND);
+                bitmap = ThumbnailUtils.createVideoThumbnail(imagePath.get(i), MediaStore.Images.Thumbnails.MINI_KIND);
             } else {
                 bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.vector_drawable_music);
             }

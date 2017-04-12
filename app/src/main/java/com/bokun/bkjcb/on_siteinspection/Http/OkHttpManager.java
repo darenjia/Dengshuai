@@ -6,30 +6,32 @@ import android.text.TextUtils;
 import com.bokun.bkjcb.on_siteinspection.Utils.LogUtil;
 import com.bokun.bkjcb.on_siteinspection.Utils.NetworkUtils;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 /**
  * Created by BKJCB on 2017/3/16.
  * 网络请求管理
  */
 
-public class OkHttpManager implements Runnable{
+public class OkHttpManager implements Runnable {
     private Context context;
     private RequestListener listener;
     private Thread currentRequest = null;
-    HttpURLConnection conn = null;
-    InputStream input = null;
+    OkHttpClient client = null;
     private HttpRequestVo requestVo;
     private static final String ENCODING = "UTF-8";
     private static final int TIME = 40 * 1000;
@@ -110,20 +112,19 @@ public class OkHttpManager implements Runnable{
 
             URL url = new URL(buf.toString());
             LogUtil.logI("URL", buf.toString());
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            client = new OkHttpClient.Builder()
+                    .connectTimeout(10, TimeUnit.MINUTES)
+                    .build();
+            Request request = new Request.Builder()
+                    .url(url)
+                    .build();
+            Response response = client.newCall(request).execute();
             // if (isUserProxy) {
             // conn.setRequestProperty("X-Online-Host", host);
             // }
-            conn.setRequestMethod("GET");
-            conn.setConnectTimeout(TIME);
-            conn.setReadTimeout(TIME);
-            int responseCode = conn.getResponseCode();
-            if (responseCode == 200) {
-                input = conn.getInputStream();
-                if (input != null) {
-                    listener.action(RequestListener.EVENT_GET_DATA_SUCCESS,
-                            readStream(input));
-                }
+            if (response.isSuccessful()) {
+                listener.action(RequestListener.EVENT_GET_DATA_SUCCESS,
+                        response.body().string());
 
             } else {
                 listener.action(RequestListener.EVENT_NETWORD_EEEOR, null);
@@ -150,47 +151,18 @@ public class OkHttpManager implements Runnable{
      */
     private void sendPostRequest() {
         try {
-
-            String requestStr = requestVo.requestJson.toString();
-            LogUtil.logI("request", requestStr);
-            byte[] data = requestStr.getBytes();
             URL url = new URL(requestVo.requestUrl);
-            conn = (HttpURLConnection) url.openConnection();
-            conn.setConnectTimeout(TIME);
-            conn.setReadTimeout(TIME);
-            conn.setDoInput(true);// 允许输入
-            conn.setDoOutput(true);// 允许输出
-            conn.setUseCaches(false);// 不使用Cache
-            conn.setRequestProperty("Charset", ENCODING);
-            conn.setRequestProperty("Content-Length",
-                    String.valueOf(data.length));
-            conn.setRequestProperty("Content-Type", "text/json;charset=utf-8");
-            conn.setRequestMethod("POST");
-
-            DataOutputStream outStream = new DataOutputStream(
-                    conn.getOutputStream());
-            outStream.write(data);
-            outStream.flush();
-            outStream.close();
-            if(conn==null){
-                return;
-            }
-            int responseCode = conn.getResponseCode();
-            if (responseCode == 200) {
-                input = conn.getInputStream();
-                if (input != null) {
-                    listener.action(RequestListener.EVENT_GET_DATA_SUCCESS,
-                            readStream(input));
-                }
-            } else if (responseCode == 404) {
-                input = conn.getErrorStream();
-                if (input != null) {
-                    listener.action(RequestListener.EVENT_GET_DATA_SUCCESS,
-                            readStream(input));
-                } else {
-                    listener.action(RequestListener.EVENT_NETWORD_EEEOR,
-                            null);
-                }
+            MediaType JSON = MediaType.parse("application/json; charset=utf-8");
+            client = new OkHttpClient();
+            RequestBody body = RequestBody.create(JSON, requestVo.requestJson);
+            Request request = new Request.Builder()
+                    .post(body)
+                    .url(url)
+                    .build();
+            Response response = client.newCall(request).execute();
+            if (response.isSuccessful()) {
+                listener.action(RequestListener.EVENT_GET_DATA_SUCCESS,
+                        response.body().string());
             } else {
                 listener.action(RequestListener.EVENT_NETWORD_EEEOR, null);
             }
@@ -199,7 +171,6 @@ public class OkHttpManager implements Runnable{
             listener.action(RequestListener.EVENT_CLOSE_SOCKET, null);
         } catch (SocketTimeoutException e) {
             e.printStackTrace();
-            LogUtil.logI("404");
             listener.action(RequestListener.EVENT_NETWORD_EEEOR, null);
         } catch (IOException e) {
             e.printStackTrace();
@@ -217,53 +188,20 @@ public class OkHttpManager implements Runnable{
         return false;
     }
 
-    /**
-     * 读取数据
-     *
-     * @param inStream
-     *            输入流
-     * @return
-     * @throws Exception
-     */
-    private Object readStream(InputStream inStream) throws Exception {
-        String result;
-        ByteArrayOutputStream outStream = new ByteArrayOutputStream();
-        byte[] buffer = new byte[1024];
-        int len = -1;
-        while ((len = inStream.read(buffer)) != -1) {
-            outStream.write(buffer, 0, len);
-        }
-        result = new String(outStream.toByteArray(), ENCODING);
-        LogUtil.logI("response", result);
-        outStream.close();
-        inStream.close();
-        if(requestVo.parser == null) {
-            return new HashMap<String, Object>();
-        }
-        return requestVo.parser.parseJSON(result);
-    }
 
     /**
      * 取消当前HTTP连接处理
      */
     public void cancelHttpRequest() {
         if (currentRequest != null && currentRequest.isAlive()) {
-            if (input != null) {
+            if (client != null) {
                 try {
-                    input.close();
+                    client.dispatcher().cancelAll();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
-            input = null;
-            if (conn != null) {
-                try {
-                    conn.disconnect();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-            conn = null;
+            client = null;
             // currentRequest.stop();
             currentRequest = null;
             System.gc();
@@ -274,7 +212,11 @@ public class OkHttpManager implements Runnable{
         // 0：无网络 1：WIFI 2：CMWAP 3：CMNET
         boolean isEnable = NetworkUtils.isEnable(context);
         if (isEnable) {
+            if (requestStatus == 1) {
+                sendGetRequest();
+            } else {
                 sendPostRequest();
+            }
         } else {
             listener.action(RequestListener.EVENT_NOT_NETWORD, null);
         }

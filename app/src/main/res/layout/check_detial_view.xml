@@ -135,8 +135,8 @@
 
             <ImageView
                 android:id="@+id/check_content_btn_camera"
-                android:layout_width="45dp"
-                android:layout_height="45dp"
+                android:layout_width="54dp"
+                android:layout_height="54dp"
                 android:paddingEnd="10dp"
                 android:paddingStart="10dp"
                 android:layout_marginStart="10dp"
@@ -144,16 +144,16 @@
 
             <ImageView
                 android:id="@+id/check_content_btn_audio"
-                android:layout_width="45dp"
-                android:layout_height="45dp"
+                android:layout_width="54dp"
+                android:layout_height="54dp"
                 android:paddingEnd="10dp"
                 android:paddingStart="10dp"
                 android:src="@drawable/vector_drawable_voice" />
 
             <ImageView
                 android:id="@+id/check_content_btn_video"
-                android:layout_width="45dp"
-                android:layout_height="45dp"
+                android:layout_width="54dp"
+                android:layout_height="54dp"
                 android:paddingEnd="10dp"
                 android:paddingStart="10dp"
                 android:src="@drawable/vector_drawable_recording" />
@@ -163,7 +163,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="@color/colorNone"
-                android:text="备注"
+                android:textSize="18sp"
+                android:text="@string/btn_remark"
                 android:textColor="#8a8a8a" />
 
         </LinearLayout>
